@@ -1107,7 +1107,7 @@ while run:
                                 else:
                                     sarect = pg.Rect(ppx-20, 5, 40, 590)
                                 pg.draw.rect(screen, (255, 0, 0), sarect)
-                            elif game['vars']['sas'] >= 450//spcttd and sarect is not None:
+                            elif game['vars']['sas'] >= 450//spcttd+5 and sarect is not None:
                                 game['vars']['sas'] = 0
                                 if player.rect.colliderect(sarect):
                                     for _ in range(75):
