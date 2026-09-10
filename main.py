@@ -947,13 +947,15 @@ while run:
                             game['vars']['dy'] *= -1
                         if ball.left < 5 and game['vars']['dx'] < 0:
                             game['vars']['cscore'] += 1
-                            ball = pg.Rect(388, 288, 24, 24)
+                            ball.x = 388
+                            ball.y = 288
                             dx = random.choice([random.randint(minb, maxb), -random.randint(minb, maxb)])
                             dy = random.choice([random.randint(minb, maxb), -random.randint(minb, maxb)])
                             game['vars']['dx'], game['vars']['dy'] = dx, dy
                         if ball.right > 795:
                             game['vars']['pscore'] += 1
-                            ball = pg.Rect(388, 288, 24, 24)
+                            ball.x = 388
+                            ball.y = 288
                             dx = random.choice([random.randint(minb, maxb), -random.randint(minb, maxb)])
                             dy = random.choice([random.randint(minb, maxb), -random.randint(minb, maxb)])
                             game['vars']['dx'], game['vars']['dy'] = dx, dy
