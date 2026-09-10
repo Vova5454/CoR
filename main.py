@@ -787,6 +787,14 @@ while run:
                         mx, my = 3, 10
                         current['mus'] = 'Space-Invaders'
                         survived = False
+                    elif interaction == "ArcadeGame3":
+                        dx, dy = random.choice([1, -1]), random.choice([1, -1])
+                        game = setup_game("ArcadeGame", 3,
+                                          {"player": pg.Rect(30, 225, 15, 150), "ball": pg.Rect(388, 288, 24, 24)},
+                                          {},
+                                          {"hits": 95, "dx": 5*dx, "dy": 5*dy, "lives": 3, "on": False},
+                                          {"player_speed": 9})
+                        spcat = False
                     clciked = False
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
@@ -1202,6 +1210,91 @@ while run:
                         mmmfont.render_to(screen, (15, 165), "Click to shoot, Z or Enter to keep shooting.", (255, 255, 255))
                         if clciked:
                             game['vars']['start'] = True
+                elif game['ID'] == 3:
+                    if game['vars']['on']:
+                        if keys[pg.K_ESCAPE]:
+                            game['on'] = False
+                        if not spcat:
+                            player = game['objects']['player']
+                            ball = game['objects']['ball']
+                            ps = game['consts']['player_speed']
+                            if keys[pg.K_w]: player.y -= ps
+                            if keys[pg.K_s]: player.y += ps
+                            if keys[pg.K_e]: player.y -= ps/2
+                            if keys[pg.K_d]: player.y += ps/2
+                            if keys[pg.K_r]: player.y -= ps/4
+                            if keys[pg.K_f]: player.y += ps/4
+                            if keys[pg.K_t]: player.y -= ps/8
+                            if keys[pg.K_g]: player.y += ps/8
+                            if player.top < 5: player.top = 5
+                            if player.bottom > 595: player.bottom = 595
+                            ball.x += game['vars']['dx']
+                            ball.y += game['vars']['dy']
+                            if game['vars']['hits'] == 10:
+                                game['consts']['player_speed'] = 10
+                            if game['vars']['hits'] == 20:
+                                game['consts']['player_speed'] = 15
+                            if game['vars']['hits'] == 30:
+                                game['consts']['player_speed'] = 20
+                            if game['vars']['hits'] == 40:
+                                game['consts']['player_speed'] = 25
+                            if game['vars']['hits'] == 50:
+                                game['consts']['player_speed'] = 30
+                            if game['vars']['hits'] == 60:
+                                game['consts']['player_speed'] = 35
+                            if game['vars']['hits'] == 70:
+                                game['consts']['player_speed'] = 40
+                            if game['vars']['hits'] == 80:
+                                game['consts']['player_speed'] = 45
+                            if game['vars']['hits'] == 90:
+                                game['consts']['player_speed'] = 50
+                            pg.draw.rect(screen, (0, 255, 0), player)
+                            pg.draw.ellipse(screen, (255, 0, 255), ball)
+                            mmmfont.render_to(screen, (15, 15), str(game['vars']['hits']), (255, 255, 255))
+                            mmmfont.render_to(screen, (765, 15), str(game['vars']['lives']), (255, 255, 255))
+                            hit = False
+                            if ball.top <= 5:
+                                ball.top = 5
+                                game['vars']['dy'] *= -1
+                                hit = True
+                            if ball.bottom >= 595:
+                                ball.bottom = 595
+                                game['vars']['dy'] *= -1
+                                hit = True
+                            if ball.right > 795:
+                                ball.right = 795
+                                hit = True
+                                game['vars']['dx'] *= -1
+                            if ball.left <= 45 and player.top < ball.centery and player.bottom > ball.centery and game[
+                                'vars']['dx'] < 0:
+                                game['vars']['dx'] *= -1
+                                game['vars']['hits'] += 1
+                                hit = True
+                                ball.left = 45
+                            if hit:
+                                game['vars']['dx'] += abs(game['vars']['dx'])/game['vars']['dx']*(random.randint(0, 15)//15)
+                                game['vars']['dy'] += abs(game['vars']['dy'])/game['vars']['dy']*(random.randint(0, 15)//15)
+                            if ball.left <= 0:
+                                ball.x = 388
+                                ball.y = 288
+                                game['vars']['lives'] -= 1
+                                if game['vars']['lives'] == 0:
+                                    game['on'] = False
+                                    screen.fill((255, 0, 0))
+                                game['vars']['dx'] = 5 * random.choice([1, -1])
+                                game['vars']['dy'] = 5 * random.choice([1, -1])
+                            if game['vars']['hits'] == 100:
+                                spcat = now
+                        else:
+                            if now - spcat > 2000:
+                                game['on'] = False
+                            mmmfont.render_to(screen, (15, 15), "Congrats! You survived!", (255, 255, 127))
+
+                    else:
+                        mmmfont.render_to(screen, (15, 15), "You need to parry the ball 100 times to win.", (255, 255, 255))
+                        mmmfont.render_to(screen, (15, 65), "You have 3 lives. Click to start.", (255, 255, 255))
+                        if clciked:
+                            game['vars']['on'] = True
                         
                         
     holding = pg.mouse.get_pressed()[0]
