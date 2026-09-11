@@ -274,7 +274,8 @@ playing = {
     'CoR1': float('-inf'),
     'Arcade': float('-inf'),
     'Ping-Pong': float('-inf'),
-    "Space-Invaders": float('-inf')
+    "Space-Invaders": float('-inf'),
+    "PingPongWV": float('-inf')
 }
 
 musID = {
@@ -289,7 +290,8 @@ musID = {
     'CoR1': pg.mixer.Sound("res/sound/outside.mp3"),
     'Arcade': pg.mixer.Sound("res/sound/arcade.mp3"),
     'Ping-Pong': pg.mixer.Sound('res/sound/PingPong.mp3'),
-    "Space-Invaders": pg.mixer.Sound('res/sound/SpaceInvaders.mp3')
+    "Space-Invaders": pg.mixer.Sound('res/sound/SpaceInvaders.mp3'),
+    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3")
 }
 
 def setup_dialogue(text, diaID=0, your_options=[],
@@ -792,8 +794,9 @@ while run:
                         game = setup_game("ArcadeGame", 3,
                                           {"player": pg.Rect(30, 225, 15, 150), "ball": pg.Rect(388, 288, 24, 24)},
                                           {},
-                                          {"hits": 95, "dx": 5*dx, "dy": 5*dy, "lives": 3, "on": False},
+                                          {"hits": 0, "dx": 5*dx, "dy": 5*dy, "lives": 3, "on": False},
                                           {"player_speed": 9})
+                        current['mus'] = "PingPongWV"
                         spcat = False
                     clciked = False
         if current['loc'] in ['kitchen', 'his_place']:
