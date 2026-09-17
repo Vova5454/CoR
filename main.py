@@ -5,7 +5,7 @@ import os
 from time import sleep
 import random
 import copy
-from sprites import Player, Meteor, Buff, Laser
+from sprites import Player, Meteor, Buff, Laser, DummySprite
 
 
 WIDTH = 800
@@ -74,7 +74,8 @@ movement = {
     "DatCornerRB": {"DatCornerR": pg.Rect(0, 550, 800, 50),
                     "Shop": pg.Rect(553, 165, 79, 157)},
     "Arcade1": {"Arcade": pg.Rect(0, 550, 800, 50),
-                "Arcade2": pg.Rect(750, 0, 50, 600)}
+                "Arcade2": pg.Rect(750, 0, 50, 600)},
+    "Arcade2": {"Arcade1": pg.Rect(0, 0, 50, 600)}
 }
 
 interactions = {
@@ -128,14 +129,15 @@ interactions = {
     "BehindHouse": [(pg.Rect(302, 225, 42, 33), "HELP!")],
     "Arcade": [(pg.Rect(356, 289, 84, 114), "Arcade")],
     "neighborhood1": [(pg.Rect(196, 173, 67, 291), "1's_house")], ##
-    'intersection2': [(pg.Rect(273, 97, 213, 243), "Dummy!")], ##
+    'intersection2': [(pg.Rect(273, 97, 213, 243), "Dummy!")],
     "LCPE": [(pg.Rect(161, 0, 214, 139), "BrickWall")],
     "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH")], ##
     "DatCornerR": [(pg.Rect(449, 168, 113, 168), "EnterRestuarant")], ##
     "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")], ##
     "Arcade1": [(pg.Rect(96, 153, 115, 286), "ArcadeGame1"),
-                (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), ##
-                (pg.Rect(536, 140, 132, 307), "ArcadeGame3")] ##
+                (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
+                (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
+    "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")]
 }
 
 images = {
@@ -170,7 +172,8 @@ images = {
     "DatCornerRB": pg.image.load('res/DatCornerRB.png').convert_alpha(),
     "Arcade1": pg.image.load('res/Arcade1.png').convert_alpha(),
     "ppu": pg.image.load('res/ping_pong_you.png').convert_alpha(),
-    "pph": pg.image.load('res/ping_pong_him.png').convert_alpha()
+    "pph": pg.image.load('res/ping_pong_him.png').convert_alpha(),
+    "Arcade2": pg.image.load('res/arcade2.png').convert_alpha()
 }
 
 font = pg.font.Font(None, 72)
@@ -225,6 +228,7 @@ def animate(frame):
 strongest = frames[9]
 saved = pg.mixer.Sound('res/sound/saved.mp3')
 bye = pg.mixer.Sound('res/sound/bye.mp3')
+
 deleto = False
 BOOK = [["Page 1", "I am about to go to job interview.",
          "I want the position called 'CEO'. Have no idea what it is but sounds cool",
@@ -245,6 +249,7 @@ TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Became CEO: 17 years ago"]
 cor1 = pg.mixer.Sound('res/sound/cor1.wav')
 emergency = pg.mixer.Sound('res/sound/emergency.mp3')
+sprite_hit = pg.mixer.Sound('res/sound/hit.mp3')
 savem = False
 current = None
 framei = 0
@@ -761,8 +766,13 @@ while run:
                         print("Yo this is unfinished.")
                         ## Unfinished
                     elif interaction == "Dummy!":
-                        print("This dummy ain't completed.")
-                        ## Unfinished
+                        game = setup_game("Dummy!", -1,
+                                          {"you": pg.Rect(380, 280, 40, 40)},
+                                          {"enemy": pg.sprite.Group()},
+                                          {"read": False, "on": False},
+                                          {"player_speed": 12})
+                        mso = None
+                        iitmem = False
                     elif interaction == "BrickWall":
                         dialogue = setup_dialogue(["It's a brick wall!"])
                     elif interaction == 'ArcadeGame1':
@@ -798,6 +808,18 @@ while run:
                                           {"player_speed": 9})
                         current['mus'] = "PingPongWV"
                         spcat = False
+                    elif interaction == "ArcadeGame4":
+                        game = setup_game("ArcadeGame", 4, {}, {},
+                                          {"typed": 0, "on": False, "word": ""},
+                                          {})
+                        spcd = {"a": pg.K_a,"b": pg.K_b,"c": pg.K_c,"d": pg.K_d,"e": pg.K_e,
+                                "f": pg.K_f,"g": pg.K_g,"h": pg.K_h,"i": pg.K_i,"j": pg.K_j,
+                                "k": pg.K_k,"l": pg.K_l,"m": pg.K_m,"n": pg.K_n,"o": pg.K_o,
+                                "p": pg.K_p,"q": pg.K_q,"r": pg.K_r,"s": pg.K_s,"t": pg.K_t,
+                                "u": pg.K_u,"v": pg.K_v,"w": pg.K_w,"x": pg.K_x,"y": pg.K_y,
+                                "z": pg.K_z}
+                        wdyptbd = {}
+                        spcdfont = pgft.SysFont("Comic Sans", 48)
                     clciked = False
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
@@ -1133,7 +1155,6 @@ while run:
                                         mmmfont.render_to(screen, (10, 100), "You survived attack!")
                                     else:
                                         screen.fill((255, 255, 0))
-                                        pg.display.flip()
                             elif game['vars']['sas'] < 432//spcttd:
                                 sarect = None
                                 player.boost = 1.5
@@ -1170,7 +1191,6 @@ while run:
                                 if player.damage():
                                     game['on'] = False
                                     screen.fill((255, 0, 0))
-                                    pg.display.flip()
                             bp = pg.sprite.spritecollideany(player, buffs)
                             if bp:
                                 bp.kill()
@@ -1298,7 +1318,324 @@ while run:
                         mmmfont.render_to(screen, (15, 65), "You have 3 lives. Click to start.", (255, 255, 255))
                         if clciked:
                             game['vars']['on'] = True
+                elif game['ID'] == 4:
+                    if game['vars']['on']:
+                        if keys[pg.K_ESCAPE]:
+                            game['on'] = False
+                        if len(game['vars']['word']) < 25:
+                            for _ in range(25-len(game['vars']['word'])):
+                                alphabet = 'abcdefghijklmnopqrstuvwxyz'
+                                game['vars']['word'] += alphabet[random.randint(0, 25)]
+                        pressed = []
+                        for string, pgm in spcd.items():
+                            if keys[pgm]:
+                                if wdyptbd[string] is None:
+                                    wdyptbd[string] = frame
+                                    pressed.append(string)
+                                if wdyptbd[string] - frame >= 6:
+                                    pressed.append(string)
+                            else:
+                                wdyptbd[string] = None
+                        for typed in pressed:
+                            if typed == game['vars']['word'][0]:
+                                game['vars']['word'] = game['vars']['word'][1:]
+                                game['vars']['typed'] += 1
+                            else:
+                                game['vars']['typed'] -= 5
+                        spcdfont.render_to(screen, (15, 115), str(round(game['vars']['typed']/(now-game['vars']['on'])*1000, 2)), (255, 255, 255))
+                        spcdfont.render_to(screen, (15, 15), game['vars']['word'], (255, 255, 255))
+
                         
+                    else:
+                        mmmfont.render_to(screen, (15, 15), "Type, correct letter gives +1. -5 if not.", (255, 255, 255))
+                        if clciked:
+                            game['vars']['on'] = now
+            elif game['type'] == "Dummy!":
+                screen.fill((0, 0, 0))
+                fontf = pgft.SysFont("Comic Sans", 36)
+                enemy = game['groups']['enemy']
+                player = game['objects']['you']
+                if game['vars']['read']:
+                    if game['vars']['on']:
+                        game['groups']['enemy'].draw(screen)
+                        game['groups']['enemy'].update()
+                        pg.draw.rect(screen, (127, 127, 127), player)
+                        pc = [sprite for sprite in enemy if
+                              sprite.rect.colliderect(player)]
+                        if pc:
+                            pc[0].kill()
+                            sprite_hit.play()
+                        if not game['groups']['enemy']:
+                            game['vars']['on'] = False
+                        if keys[pg.K_w]:
+                            player.y -= game['consts']['player_speed']
+                        if keys[pg.K_a]:
+                            player.x -= game['consts']['player_speed']
+                        if keys[pg.K_s]:
+                            player.y += game['consts']['player_speed']
+                        if keys[pg.K_d]:
+                            player.x += game['consts']['player_speed']
+                        if player.left < 0: player.left = 0
+                        if player.right > 800: player.right = 800
+                        if player.bottom > 600: player.bottom = 600
+                        if player.top < 0: player.top = 0
+
+                    else:
+                        fontf.render_to(screen, (790-fontf.get_rect(str(len(enemy))).width, 10), str(len(enemy)), (255, 255, 255))
+                        rae = pg.Rect(750, 50, 40, 40)
+                        sgb = pg.Rect(375, 275, 50, 50)
+                        etsotp = pg.Rect(10, 10, 150, 50)
+                        plus = pg.image.load("res/dummy_plus.png")
+                        minus = pg.image.load("res/dummy_minus.png")
+                        trfie = pg.Rect(10, 550, 40, 40)
+                        add = pg.Rect(350, 250, 100, 100)
+                        arfae = pg.Rect(375, 20, 50, 50)
+                        back = pg.Rect(0, 0, 75, 75)
+                        x = pg.Rect(100, 10, 100, 50)
+                        y = pg.Rect(210, 10, 100, 50)
+                        wi = pg.Rect(320, 10, 100, 50)
+                        he = pg.Rect(430, 10, 100, 50)
+                        dxr = pg.Rect(540, 10, 100, 50)
+                        dyr = pg.Rect(650, 10, 100, 50)
+                        rfew = pg.Rect(450, 325, 150, 50)
+                        rfeh = pg.Rect(450, 425, 150, 50)
+                        aeb = [x, y, wi, he, dxr, dyr]
+                        if mso is None:
+                            fontf.render_to(screen, (750, 90), "del", (255, 255, 255))
+                            pg.draw.rect(screen, (255, 0, 0), rae)
+                            pg.draw.rect(screen, (220, 230, 240), trfie)
+                            pg.draw.rect(screen, (127, 255, 127), arfae)
+                            pg.draw.rect(screen, (255, 255, 255), sgb)
+                            pg.draw.rect(screen, (72, 72, 72), etsotp)
+                            screen.blit(plus, (10, 10))
+                            fontf.render_to(screen, (10, 525), "Inspect Enemies", (255, 255, 255))
+                            fontf.render_to(screen, (65, 15), str(game['consts']['player_speed']), (255, 255, 255))
+                            screen.blit(minus, (110, 10))
+                            fontf.render_to(screen, (375, 75), "Add enemy", (255, 255, 0))
+                            fontf.render_to(screen, (335, 225), "START", (255, 255, 255))
+                            if rae.collidepoint(mouse) and clciked:
+                                game['groups']['enemy'] = pg.sprite.Group()
+                            if sgb.collidepoint(mouse) and clciked:
+                                game['vars']['on'] = True
+                            if pg.Rect(10, 10, 50, 50).collidepoint(mouse) and clciked:
+                                game['consts']['player_speed'] += 1
+                            if pg.Rect(110, 10, 50, 50).collidepoint(mouse) and clciked:
+                                game['consts']['player_speed'] -= 1
+                            if trfie.collidepoint(mouse) and clciked and len(enemy) > 0:
+                                mso = "inspect_enemy"
+                                iitmem = 0
+                            if arfae.collidepoint(mouse) and clciked:
+                                ae = [0, 0, 0, 0, 5, 5]
+                                mso = "add_enemy"
+                                hdfs = [False for _ in range(12)]
+                                wyt = None
+                            pg.draw.rect(screen, (196, 196, 196), rfew)
+                            pg.draw.rect(screen, (196, 196, 196), rfeh)
+                            screen.blit(plus, (450, 325))
+                            screen.blit(plus, (450, 425))
+                            screen.blit(minus, (550, 325))
+                            screen.blit(minus, (550, 425))
+                            explore = pg.image.load("res/map_explore_sign.png")
+                            screen.blit(explore, (100, 400))
+                            exr = pg.Rect(100, 400, 50, 50)
+                            fontf.render_to(screen, (500, 335), str(player.width))
+                            fontf.render_to(screen, (500, 435), str(player.height))
+                            if pg.Rect(450, 325, 50, 50).collidepoint(mouse) and clciked:
+                                player.width += 1
+                            if pg.Rect(450, 425, 50, 50).collidepoint(mouse) and clciked:
+                                player.height += 1
+                            if pg.Rect(550, 325, 50, 50).collidepoint(mouse) and clciked:
+                                player.width -= 1
+                            if pg.Rect(550, 425, 50, 50).collidepoint(mouse) and clciked:
+                                player.height -= 1
+                            if trfie.collidepoint(mouse) and clciked and len(enemy):
+                                mso = "inspect_enemy"
+                                enemies_but_list = [rect for rect in enemy]
+                                index_for_enemies = 0
+                            if exr.collidepoint(mouse) and clciked:
+                                mso = "map_explore"
+                                moved_x = 0
+                                moved_y = 0
+                        elif mso == "add_enemy":
+                            pg.draw.rect(screen, (255, 255, 255), add)
+                            pg.draw.rect(screen, (127, 127, 127), x)
+                            fontf.render_to(screen, (110, 20), str(ae[0]), (255, 255, 255))
+                            pg.draw.rect(screen, (127, 127, 127), y)
+                            fontf.render_to(screen, (220, 20), str(ae[1]), (255, 255, 255))
+                            pg.draw.rect(screen, (127, 127, 127), wi)
+                            fontf.render_to(screen, (330, 20), str(ae[2]), (255, 255, 255))
+                            pg.draw.rect(screen, (127, 127, 127), he)
+                            fontf.render_to(screen, (440, 20), str(ae[3]), (255, 255, 255))
+                            pg.draw.rect(screen, (127, 127, 127), dxr)
+                            fontf.render_to(screen, (550, 20), str(ae[4]), (255, 255, 255))
+                            pg.draw.rect(screen, (127, 127, 127), dyr)
+                            fontf.render_to(screen, (660, 20), str(ae[5]), (255, 255, 255))
+                            pg.draw.rect(screen, (255, 127, 63), back)
+                            fontf.render_to(screen, (350, 200), "Add", (0, 255, 255))
+                            fontf.render_to(screen, (10, 55), "Back", (142, 45, 66))
+                            if add.collidepoint(mouse) and clciked:
+                                de = DummySprite((ae[2], ae[3]), (ae[0], ae[1]), ae[4], ae[5])
+                                enemy.add(de)
+                            if back.collidepoint(mouse) and clciked:
+                                mso = None
+                            cotbfae = False
+                            isfto = 0
+                            for ia in aeb:
+                                if ia.collidepoint(mouse) and clciked:
+                                    wyt = isfto
+                                    cotbfae = True
+                                isfto += 1
+                            if not cotbfae and clciked:
+                                ia = None
+                            iadd = {
+                                0: 0,
+                                1: 1,
+                                2: 2,
+                                3: 3,
+                                4: 4,
+                                5: 5
+                            }
+                            ia = wyt
+                            if ia or ia == 0:
+                                if keys[pg.K_1]:
+                                    if not hdfs[1]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 1
+                                    hdfs[1] = True
+                                else:
+                                    hdfs[1] = False
+                                if keys[pg.K_2]:
+                                    if not hdfs[2]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 2
+                                    hdfs[2] = True
+                                else:
+                                    hdfs[2] = False
+                                if keys[pg.K_3]:
+                                    if not hdfs[3]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 3
+                                    hdfs[3] = True
+                                else:
+                                    hdfs[3] = False
+                                if keys[pg.K_4]:
+                                    if not hdfs[4]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 4
+                                    hdfs[4] = True
+                                else:
+                                    hdfs[4] = False
+                                if keys[pg.K_5]:
+                                    if not hdfs[5]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 5
+                                    hdfs[5] = True
+                                else:
+                                    hdfs[5] = False
+                                if keys[pg.K_6]:
+                                    if not hdfs[6]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 6
+                                    hdfs[6] = True
+                                else:
+                                    hdfs[6] = False
+                                if keys[pg.K_7]:
+                                    if not hdfs[7]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 7
+                                    hdfs[7] = True
+                                else:
+                                    hdfs[7] = False
+                                if keys[pg.K_8]:
+                                    if not hdfs[8]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 8
+                                    hdfs[8] = True
+                                else:
+                                    hdfs[8] = False
+                                if keys[pg.K_9]:
+                                    if not hdfs[9]:
+                                        ae[iadd[ia]] *= 10
+                                        ae[iadd[ia]] += 9
+                                    hdfs[9] = True
+                                else:
+                                    hdfs[9] = False
+                                if keys[pg.K_0]:
+                                    if not hdfs[0]:
+                                        ae[iadd[ia]] *= 10
+                                    hdfs[0] = True
+                                else:
+                                    hdfs[0] = False
+                                if keys[pg.K_MINUS]:
+                                    if not hdfs[10]:
+                                        ae[iadd[ia]] *= -1
+                                    hdfs[10] = True
+                                else:
+                                    hdfs[10] = False
+                                if keys[pg.K_BACKSPACE]:
+                                    if not hdfs[11]:
+                                        ae[iadd[ia]] = 0
+                                    hdfs[11] = True
+                                else:
+                                    hdfs[11] = False
+                        elif mso == "inspect_enemy":
+                            left = pg.image.load("res/dummy_left.png")
+                            right = pg.image.load("res/dummy_right.png")
+                            pg.draw.rect(screen, (127, 0, 0), pg.Rect(0, 0, 150, 50))
+                            fontf.render_to(screen, (10, 10), "Back", (255, 255, 255))
+                            if pg.Rect(0, 0, 150, 50).collidepoint(mouse) and clciked:
+                                mso = None
+                            screen.blit(left, (325, 450))
+                            screen.blit(right, (425, 450))
+                            fontf.render_to(screen, (380, 460), str(index_for_enemies), (255, 255, 255))
+                            if pg.Rect(325, 450, 50, 50).collidepoint(mouse) and clciked:
+                                index_for_enemies -= 1
+                            if pg.Rect(425, 450, 50, 50).collidepoint(mouse) and clciked:
+                                index_for_enemies += 1
+                            index_for_enemies %= len(enemies_but_list)
+                            specific_enemy = enemies_but_list[index_for_enemies]
+                            fontf.render_to(screen, (300, 100), f'X: {str(specific_enemy.rect.x)}', (255, 255, 255))
+                            fontf.render_to(screen, (300, 150), f'Y: {str(specific_enemy.rect.y)}', (255, 255, 255))
+                            fontf.render_to(screen, (300, 200), f'Width: {str(specific_enemy.rect.width)}', (255, 255, 255))
+                            fontf.render_to(screen, (300, 250), f'Height: {str(specific_enemy.rect.height)}', (255, 255, 255))
+                            fontf.render_to(screen, (300, 300), f'DX: {str(specific_enemy.dx)}', (255, 255, 255))
+                            fontf.render_to(screen, (300, 350), f'DY: {str(specific_enemy.dy)}', (255, 255, 255))
+                        elif mso == "map_explore":
+                            game['groups']['enemy'].draw(screen)
+                            fontf.render_to(screen, (10, 10), f'{moved_x}, {moved_y}', (255, 255, 255))
+                            screen.blit(explore, (100, 400))
+                            if exr.collidepoint(mouse) and clciked:
+                                mso = None
+                            new_movement_x = 0
+                            new_movement_y = 0
+                            if keys[pg.K_w]:
+                                new_movement_y += game['consts']['player_speed']
+                            if keys[pg.K_a]:
+                                new_movement_x += game['consts']['player_speed']
+                            if keys[pg.K_s]:
+                                new_movement_y -= game['consts']['player_speed']
+                            if keys[pg.K_d]:
+                                new_movement_x -= game['consts']['player_speed']
+                            moved_x += new_movement_x
+                            moved_y += new_movement_y
+                            for obj in enemy:
+                                obj.rect.x += new_movement_x
+                                obj.rect.y += new_movement_y
+                            if mso is None:
+                                for obj in enemy:
+                                    obj.rect.x -= moved_x
+                                    obj.rect.y -= moved_y
+                else:
+                    fontf.render_to(screen, (10, 10), "You can simulate attack patterns with this", (255, 255, 255))
+                    fontf.render_to(screen, (10, 60), "dummy. You can add rects which will attack", (255, 255, 255))
+                    fontf.render_to(screen, (10, 110), "and play a noise if you hit them. You can't", (255, 255, 255))
+                    fontf.render_to(screen, (10, 160), "delete a single object, has to be all of them.", (255, 255, 255))
+                    fontf.render_to(screen, (10, 210), "You can customize the speed of yourself and", (255, 255, 255))
+                    fontf.render_to(screen, (10, 260), "the objects. Click to start. ESC to exit.", (255, 255, 255))
+                    if clciked:
+                        game['vars']['read'] = True
+                if keys[pg.K_ESCAPE]:
+                    game['on'] = False
                         
     holding = pg.mouse.get_pressed()[0]
     pg.display.flip()

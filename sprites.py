@@ -148,3 +148,31 @@ class Laser():
     def unlightning(self):
         self.speed /= 10
         self.light = False
+
+class DummySprite(pg.sprite.Sprite):
+    def __init__(self, size, pos, dx, dy):
+        super().__init__()
+        self.image = pg.image.load('res/gray.png')
+        self.image = pg.transform.scale(self.image, size)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.dx = dx
+        self.dy = dy
+
+    def move(self):
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+        if self.rect.top > 600 and self.dy > 0:
+            self.kill()
+        elif self.rect.bottom < 0 and self.dy < 0:
+            self.kill()
+        elif self.rect.right < 0 and self.dx < 0:
+            self.kill()
+        elif self.rect.left > 800 and self.dx > 0:
+            self.kill()
+
+    def draw(self, screen: pg.Surface):
+        screen.blit(self.image, self.rect.topleft)
+
+    def update(self):
+        self.move()
