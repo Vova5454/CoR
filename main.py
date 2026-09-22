@@ -135,18 +135,13 @@ interactions = {
     'intersection2': [(pg.Rect(273, 97, 213, 243), "Dummy!")],
     "LCPE": [(pg.Rect(161, 0, 214, 139), "BrickWall")],
     "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH"), ##
-                  (pg.Rect(231, 270, 146, 131), "chips")], 
+                  (pg.Rect(231, 270, 146, 131), "chips")], ##
     "DatCornerR": [(pg.Rect(449, 168, 113, 168), "EnterRestuarant")], ##
     "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")], ##
     "Arcade1": [(pg.Rect(96, 153, 115, 286), "ArcadeGame1"),
                 (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
-    # "Roulette": [(pg.Rect(35, 50, 150, 50), "roulette_button_1"),
-    #              (pg.Rect(35, 150, 150, 50), "roulette_button_2"),
-    #              (pg.Rect(35, 250, 150, 50), "roulette_button_3"),
-    #              (pg.Rect(600, 400, 150, 50), "roulette_exit"),
-    #              (pg.Rect(600, 100, 150, 50), "roulette_typing_field")]
 }
 
 images = {
