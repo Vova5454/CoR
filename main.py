@@ -75,7 +75,10 @@ movement = {
                     "Shop": pg.Rect(553, 165, 79, 157)},
     "Arcade1": {"Arcade": pg.Rect(0, 550, 800, 50),
                 "Arcade2": pg.Rect(750, 0, 50, 600)},
-    "Arcade2": {"Arcade1": pg.Rect(0, 0, 50, 600)}
+    "Arcade2": {"Arcade1": pg.Rect(0, 0, 50, 600)},
+    "CasinoEntrance": {"DatCorner": pg.Rect(0, 550, 800,50),
+                       "Roulette": pg.Rect(241, 216, 268, 235)},
+    "Roulette": {}
 }
 
 interactions = {
@@ -131,13 +134,19 @@ interactions = {
     "neighborhood1": [(pg.Rect(196, 173, 67, 291), "1's_house")], ##
     'intersection2': [(pg.Rect(273, 97, 213, 243), "Dummy!")],
     "LCPE": [(pg.Rect(161, 0, 214, 139), "BrickWall")],
-    "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH")], ##
+    "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH"), ##
+                  (pg.Rect(231, 270, 146, 131), "chips")], 
     "DatCornerR": [(pg.Rect(449, 168, 113, 168), "EnterRestuarant")], ##
     "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")], ##
     "Arcade1": [(pg.Rect(96, 153, 115, 286), "ArcadeGame1"),
                 (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
-    "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")]
+    "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
+    # "Roulette": [(pg.Rect(35, 50, 150, 50), "roulette_button_1"),
+    #              (pg.Rect(35, 150, 150, 50), "roulette_button_2"),
+    #              (pg.Rect(35, 250, 150, 50), "roulette_button_3"),
+    #              (pg.Rect(600, 400, 150, 50), "roulette_exit"),
+    #              (pg.Rect(600, 100, 150, 50), "roulette_typing_field")]
 }
 
 images = {
@@ -173,11 +182,14 @@ images = {
     "Arcade1": pg.image.load('res/Arcade1.png').convert_alpha(),
     "ppu": pg.image.load('res/ping_pong_you.png').convert_alpha(),
     "pph": pg.image.load('res/ping_pong_him.png').convert_alpha(),
-    "Arcade2": pg.image.load('res/arcade2.png').convert_alpha()
+    "Arcade2": pg.image.load('res/arcade2.png').convert_alpha(),
+    "CasinoEntrance": pg.image.load('res/CasinoEntrance.png').convert_alpha(),
+    "Roulette": pg.image.load('res/roulette.png').convert_alpha()
 }
 
 font = pg.font.Font(None, 72)
 pg.mixer.init()
+explore = pg.image.load("res/map_explore_sign.png")
 errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
 
@@ -211,7 +223,10 @@ default = {
     "sat_on_couch_count": 0,
     "6Chips": False,
     "Ping-Pong_high_score": 0,
-    "legend": False
+    "legend": False,
+    "inventory": [],
+    "got_key": False,
+    "CasinoChips": 0
 }
 
 mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
@@ -219,6 +234,8 @@ mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
 mm = True
 m = False
 need_error = False
+plus = pg.image.load("res/dummy_plus.png")
+minus = pg.image.load("res/dummy_minus.png")
 frames = [pg.image.load(f'res/frames/{x}.png') for x in range(10)]
 def animate(frame):
     frame += 1
@@ -251,7 +268,9 @@ cor1 = pg.mixer.Sound('res/sound/cor1.wav')
 emergency = pg.mixer.Sound('res/sound/emergency.mp3')
 sprite_hit = pg.mixer.Sound('res/sound/hit.mp3')
 savem = False
+casino_font = pgft.SysFont("Bell MT", 24)
 current = None
+aud = {"ct": False}
 framei = 0
 inspired = False
 ribbit = pg.mixer.Sound('res/sound/frog.mp3')
@@ -282,6 +301,12 @@ playing = {
     "Space-Invaders": float('-inf'),
     "PingPongWV": float('-inf')
 }
+
+settings = save("saves/settings.json")
+sfx = settings['sfx']
+mus = settings['mus']
+
+## Add inventory
 
 musID = {
     'home': cor1,
@@ -338,6 +363,8 @@ game = def_game()
 frame = 0
 run = True
 while run:
+    rdud = {}
+    pressing = set()
     frame += 1
     framei += 1
     if framei == 30:
@@ -365,15 +392,30 @@ while run:
     mouse = pg.mouse.get_pos()
     for event in pg.event.get():
         if event.type == pg.QUIT:
+            bye.set_volume(sfx)
             bye.play()
             sleep(bye.get_length())
             run = False
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE and not mm and not dialogue['on'] and not game['on']:
                 m = {True: False, False: True}[m]
+            if event.key == pg.K_0: pressing.add(0)
+            if event.key == pg.K_1: pressing.add(1)
+            if event.key == pg.K_2: pressing.add(2)
+            if event.key == pg.K_3: pressing.add(3)
+            if event.key == pg.K_4: pressing.add(4)
+            if event.key == pg.K_5: pressing.add(5)
+            if event.key == pg.K_6: pressing.add(6)
+            if event.key == pg.K_7: pressing.add(7)
+            if event.key == pg.K_8: pressing.add(8)
+            if event.key == pg.K_9: pressing.add(9)
+            if event.key == pg.K_BACKSPACE: pressing.add('backspace')
+            if event.key == pg.K_MINUS: pressing.add('-')
         if event.type == pg.MOUSEBUTTONDOWN:
             if pg.mouse.get_pressed()[0] and not holding:
                 clciked = True
+    for music in musID.values():
+        music.set_volume(mus)
     now = pg.time.get_ticks()
     if m:
         screen.fill((25, 150, 50))
@@ -387,6 +429,7 @@ while run:
                     m = False
                 elif recti == 1:
                     save(savefile, current)
+                    saved.set_volume(sfx)
                     saved.play()
                 elif recti == 2:
                     current = None
@@ -401,9 +444,39 @@ while run:
                     for played in playing:
                         playing[played] = float('-inf')
                 else:
+                    bye.set_volume(sfx)
                     bye.play()
                     sleep(bye.get_length())
                     run = False
+        pg.draw.rect(screen, (127, 127, 127), pg.Rect(600, 50, 150, 50))
+        pg.draw.rect(screen, (127, 127, 127), pg.Rect(600, 150, 150, 50))
+        screen.blit(plus, (600, 50))
+        screen.blit(plus, (600, 150))
+        screen.blit(minus, (700, 50))
+        screen.blit(minus, (700, 150))
+        sfxe = 0
+        muse = 0
+        if pg.Rect(600, 50, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
+            sfxe += 0.01
+        if pg.Rect(700, 50, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
+             sfxe -= 0.01
+        if pg.Rect(600, 150, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
+            muse += 0.01
+        if pg.Rect(700, 150, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
+            muse -= 0.01
+        settings['sfx'] += sfxe
+        settings['mus'] += muse
+        if settings['sfx'] < 0: settings['sfx'] = 0
+        if settings['mus'] < 0: settings['mus'] = 0
+        if pg.key.get_pressed()[pg.K_BACKSPACE]:
+            settings['sfx'] = 1
+            settings['mus'] = 1
+        minifont = pgft.SysFont(None, 12)
+        minifont.render_to(screen, (660, 60), str((settings['sfx']*100)//1), (255, 255, 255))
+        minifont.render_to(screen, (660, 160), str((settings['mus']*100)//1), (255, 255, 255))
+        save("saves/settings.json", settings)
+        sfx = settings['sfx']
+        mus = settings['mus']
         clciked = False
     if mm:
         screen.fill((200, 200, 200))
@@ -416,6 +489,7 @@ while run:
                 clciked = False
                 # if recti == 2 and now-lastm>200:
                 if recti == 2:
+                    bye.set_volume(sfx)
                     bye.play()
                     sleep(bye.get_length())
                     run = False
@@ -433,6 +507,7 @@ while run:
             deleto = False
             mm = True
             m = False
+        keys = pg.key.get_pressed()
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
@@ -462,6 +537,10 @@ while run:
                     if os.path.exists(savefile) and os.path.getsize(savefile) == 0:
                         save(savefile, default)
                         current = default
+                    for elem in default:
+                        if current.get(elem, default[elem]) == default[elem]:
+                            current[elem] = default[elem]
+                    save(savefile, current)
                     mm = False
                     inspired = False
                     clciked = False
@@ -519,6 +598,7 @@ while run:
             mmmfont.render_to(screen, (400, 300), str(current['loc']), (0, 0, 0))
         if current:
             if now-playing[current['mus']]>=musID[current['mus']].get_length()*1000:
+                musID[current['mus']].set_volume(mus)
                 musID[current['mus']].play()
                 playing[current['mus']] = now
         if current['loc'] in interactions and not dialogue['on'] and not game['on']:
@@ -526,6 +606,7 @@ while run:
                 if ntc.collidepoint(mouse) and clciked:
                     if interaction == 'blowhorn':
                         current['blowhornblew'] = current.get('blowhornblew', 0) + 1
+                        emergency.set_volume(sfx)
                         emergency.play()
                         playing['home'] = now+emergency.get_length()*1000-musID[current['mus']].get_length()*1000
                         cor1.stop()
@@ -555,6 +636,7 @@ while run:
                     elif interaction == 'leave':
                         current['loc'] = 'intersection1'
                     elif interaction == 'view_hubert':
+                        ribbit.set_volume(sfx)
                         ribbit.play()
                         musID[current['mus']].stop()
                         playing[current['mus']] = now-musID[current['mus']].get_length()*1000+ribbit.get_length()*1000
@@ -772,7 +854,6 @@ while run:
                                           {"read": False, "on": False},
                                           {"player_speed": 12})
                         mso = None
-                        iitmem = False
                     elif interaction == "BrickWall":
                         dialogue = setup_dialogue(["It's a brick wall!"])
                     elif interaction == 'ArcadeGame1':
@@ -820,6 +901,12 @@ while run:
                                 "z": pg.K_z}
                         wdyptbd = {}
                         spcdfont = pgft.SysFont("Comic Sans", 48)
+                    elif interaction == "Dumpster":
+                        if not current['got_key']:
+                            dialogue = setup_dialogue(["There's a small key in the dumpster", "Take it?", None], 5,
+                                                  [None, None, ["Take", "Leave"]], pgft.SysFont(None, 24))
+                        else:
+                            dialogue = setup_dialogue(["Dumpster"])
                     clciked = False
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
@@ -878,6 +965,11 @@ while run:
                             dialogue['text'] += ["Yummers"]
                         else:
                             dialogue['text'] += ["Then you shall starve...", "JK"]
+                    elif dialogue['diaID'] == 5:
+                        if dialogue['responses'][-1] == 0:
+                            current['inventory'].append("key")
+                            current['got_key'] = True
+                            dialogue['text'].append("You got the key.")
                     dialogue['JSR'] = False
                 try:
                     opt_split = dialogue['text'][dialogue['processID']]
@@ -893,7 +985,7 @@ while run:
 
                 box_lines = []
                 temp = ''
-                tall_boi = dialogue['font'].get_rect('()').height
+                tall_boi = dialogue['font'].size
                 dfont = dialogue['font']
                 text = dialogue['text'][dialogue['processID']]
                 text = text.split()
@@ -1364,6 +1456,7 @@ while run:
                               sprite.rect.colliderect(player)]
                         if pc:
                             pc[0].kill()
+                            sprite_hit.set_volume(sfx)
                             sprite_hit.play()
                         if not game['groups']['enemy']:
                             game['vars']['on'] = False
@@ -1385,8 +1478,6 @@ while run:
                         rae = pg.Rect(750, 50, 40, 40)
                         sgb = pg.Rect(375, 275, 50, 50)
                         etsotp = pg.Rect(10, 10, 150, 50)
-                        plus = pg.image.load("res/dummy_plus.png")
-                        minus = pg.image.load("res/dummy_minus.png")
                         trfie = pg.Rect(10, 550, 40, 40)
                         add = pg.Rect(350, 250, 100, 100)
                         arfae = pg.Rect(375, 20, 50, 50)
@@ -1421,13 +1512,10 @@ while run:
                                 game['consts']['player_speed'] += 1
                             if pg.Rect(110, 10, 50, 50).collidepoint(mouse) and clciked:
                                 game['consts']['player_speed'] -= 1
-                            if trfie.collidepoint(mouse) and clciked and len(enemy) > 0:
-                                mso = "inspect_enemy"
-                                iitmem = 0
                             if arfae.collidepoint(mouse) and clciked:
                                 ae = [0, 0, 0, 0, 5, 5]
                                 mso = "add_enemy"
-                                hdfs = [False for _ in range(12)]
+                                # hdfs = [False for _ in range(12)]
                                 wyt = None
                             pg.draw.rect(screen, (196, 196, 196), rfew)
                             pg.draw.rect(screen, (196, 196, 196), rfeh)
@@ -1435,7 +1523,6 @@ while run:
                             screen.blit(plus, (450, 425))
                             screen.blit(minus, (550, 325))
                             screen.blit(minus, (550, 425))
-                            explore = pg.image.load("res/map_explore_sign.png")
                             screen.blit(explore, (100, 400))
                             exr = pg.Rect(100, 400, 50, 50)
                             fontf.render_to(screen, (500, 335), str(player.width))
@@ -1497,87 +1584,39 @@ while run:
                             }
                             ia = wyt
                             if ia or ia == 0:
-                                if keys[pg.K_1]:
-                                    if not hdfs[1]:
+                                if 1 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 1
-                                    hdfs[1] = True
-                                else:
-                                    hdfs[1] = False
-                                if keys[pg.K_2]:
-                                    if not hdfs[2]:
+                                if 2 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 2
-                                    hdfs[2] = True
-                                else:
-                                    hdfs[2] = False
-                                if keys[pg.K_3]:
-                                    if not hdfs[3]:
+                                if 3 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 3
-                                    hdfs[3] = True
-                                else:
-                                    hdfs[3] = False
-                                if keys[pg.K_4]:
-                                    if not hdfs[4]:
+                                if 4 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 4
-                                    hdfs[4] = True
-                                else:
-                                    hdfs[4] = False
-                                if keys[pg.K_5]:
-                                    if not hdfs[5]:
+                                if 5 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 5
-                                    hdfs[5] = True
-                                else:
-                                    hdfs[5] = False
-                                if keys[pg.K_6]:
-                                    if not hdfs[6]:
+                                if 6 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 6
-                                    hdfs[6] = True
-                                else:
-                                    hdfs[6] = False
-                                if keys[pg.K_7]:
-                                    if not hdfs[7]:
+                                if 7 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 7
-                                    hdfs[7] = True
-                                else:
-                                    hdfs[7] = False
-                                if keys[pg.K_8]:
-                                    if not hdfs[8]:
+                                if 8 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 8
-                                    hdfs[8] = True
-                                else:
-                                    hdfs[8] = False
-                                if keys[pg.K_9]:
-                                    if not hdfs[9]:
+                                if 9 in pressing:
                                         ae[iadd[ia]] *= 10
                                         ae[iadd[ia]] += 9
-                                    hdfs[9] = True
-                                else:
-                                    hdfs[9] = False
-                                if keys[pg.K_0]:
-                                    if not hdfs[0]:
+                                if 0 in pressing:
                                         ae[iadd[ia]] *= 10
-                                    hdfs[0] = True
-                                else:
-                                    hdfs[0] = False
-                                if keys[pg.K_MINUS]:
-                                    if not hdfs[10]:
+                                if '-' in pressing:
                                         ae[iadd[ia]] *= -1
-                                    hdfs[10] = True
-                                else:
-                                    hdfs[10] = False
-                                if keys[pg.K_BACKSPACE]:
-                                    if not hdfs[11]:
+                                if 'backspace' in pressing:
                                         ae[iadd[ia]] = 0
-                                    hdfs[11] = True
-                                else:
-                                    hdfs[11] = False
                         elif mso == "inspect_enemy":
                             left = pg.image.load("res/dummy_left.png")
                             right = pg.image.load("res/dummy_right.png")
@@ -1636,7 +1675,102 @@ while run:
                         game['vars']['read'] = True
                 if keys[pg.K_ESCAPE]:
                     game['on'] = False
-                        
+            elif game['type'] == "CasinoGame":
+                if game['ID'] == 1:
+                    if game['vars']['start']:
+                        if not game['vars']['betting_on']:
+                            casino_font.render_to(screen, (610, 50),
+                                f'Bet: {game['vars']['bet']}', (0, 0, 0))
+                            pg.draw.rect(screen, (255, 0, 0), pg.Rect(35, 50, 150, 50))
+                            casino_font.render_to(screen, (45, 60), "RED", (0, 255, 255))
+                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(35, 150, 150, 50))
+                            casino_font.render_to(screen, (45, 160), "BLACK", (255, 255, 255))
+                            pg.draw.rect(screen, (0, 255, 0), pg.Rect(35, 250, 150, 50))
+                            casino_font.render_to(screen, (45, 260), "GREEN", (255, 0, 255))
+                            if pg.Rect(35, 50, 150, 50).collidepoint(mouse) and clciked:
+                                game['vars']['betting_on'] = 'RED'
+                            if pg.Rect(35, 150, 150, 50).collidepoint(mouse) and clciked:
+                                game['vars']['betting_on'] = 'BLACK'
+                            if pg.Rect(35, 250, 150, 50).collidepoint(mouse) and clciked:
+                                game['vars']['betting_on'] = 'GREEN'
+                            game['vars']['starttime'] = now
+                        else:
+                            if now - game['vars']['starttime'] < 1000:
+                                temp = pg.Rect(0, 0, 24, 24)
+                                while ((400-temp.centerx)**2 + (300-temp.centery)**2)**0.5 > game['consts']['dist']:
+                                    temp.center = (random.randint(0, 800), random.randint(0, 600))
+                                game['objects']['ball'] = temp
+                                got = random.randint(0, 36)
+                            else:
+                                if got == 0:
+                                    gott = 'GREEN'
+                                elif got % 2:
+                                    gott = 'RED'
+                                else:
+                                    gott = 'BLACK'
+                                if gott != game['vars']['betting_on']:
+                                    current['CasinoChips'] -= game['vars']['bet']
+                                    game['vars']['text'] = [now, f"{gott}... You lose ${game['vars']['bet']}"]
+                                else:
+                                    if gott == 'GREEN':
+                                        current['CasinoChips'] += 36*game['vars']['bet']
+                                        game['vars']['text'] = [now, f"{gott}! You won ${36*game['vars']['bet']}"]
+                                    else:
+                                        current['CasinoChips'] += game['vars']['bet']
+                                        game['vars']['text'] = [now, f"{gott}! You won ${game['vars']['bet']}"]
+                                save(savefile, current)
+                                game['vars']['start'] = False
+                                
+                    else:
+                        game['objects']['ball'] = pg.Rect(388, 288, 24, 24)
+                        casino_font.render_to(screen, (610, 50),
+                            f'Chips: {str(current['CasinoChips'])}')
+                        pg.draw.rect(screen, (20, 50, 50), pg.Rect(600, 400, 150, 50))
+                        casino_font.render_to(screen, (610, 410), "exit", (127, 255, 255))
+                        if pg.Rect(600, 400, 150, 50).collidepoint(mouse) and clciked:
+                            game['on'] = False
+                            current['loc'] = "CasinoEntrance"
+                        pg.draw.rect(screen, (127, 127, 196), pg.Rect(600, 100, 150, 50))
+                        casino_font.render_to(screen, (610, 110), str(game['vars']['bet']))
+                        if pg.Rect(600, 100, 150, 50).collidepoint(mouse) and clciked:
+                            if game['vars']['bet'] < 0:
+                                game['vars']['text'] = [now, "Should be positive."]
+                            elif game['vars']['bet'] > current['CasinoChips']:
+                                game['vars']['text'] = [now, "You're too broke!"]
+                            else:
+                                game['vars']['start'] = True
+                                game['vars']['betting_on'] = False
+                        game['vars']['bet'] = str(game['vars']['bet'])
+                        if 'backspace' in pressing: game['vars']['bet'] = '0'
+                        if 0 in pressing: game['vars']['bet'] += '0'
+                        if 1 in pressing: game['vars']['bet'] += '1'
+                        if 2 in pressing: game['vars']['bet'] += '2'
+                        if 3 in pressing: game['vars']['bet'] += '3'
+                        if 4 in pressing: game['vars']['bet'] += '4'
+                        if 5 in pressing: game['vars']['bet'] += '5'
+                        if 6 in pressing: game['vars']['bet'] += '6'
+                        if 7 in pressing: game['vars']['bet'] += '7'
+                        if 8 in pressing: game['vars']['bet'] += '8'
+                        if 9 in pressing: game['vars']['bet'] += '9'
+                        game['vars']['bet'] = int(game['vars']['bet'])
+                    if now - game['vars']['text'][0] < 1500:
+                        casino_font.render_to(screen, (300, 200),
+                        game['vars']['text'][1], (255, 255, 255))
+                    pg.draw.ellipse(screen, (255, 255, 255), game['objects']['ball'])
+        if current['loc'] == "Roulette" and not game['on']:
+            pg.draw.rect(screen, (64, 64, 64), pg.Rect(600, 400, 150, 50))
+            casino_font.render_to(screen, (610, 410), "EXIT", (186, 186, 186))
+            if pg.Rect(600, 400, 150, 50).collidepoint(mouse) and clciked:
+                current['loc'] = "CasinoEntrance"
+            pg.draw.rect(screen, (100, 100, 200), pg.Rect(600, 100, 150, 50))
+            casino_font.render_to(screen, (610, 110), "Start", (120, 50, 60))
+            if pg.Rect(600, 100, 150, 50).collidepoint(mouse) and clciked:
+                game = setup_game("CasinoGame", 1,
+                                  {"ball": pg.Rect(388, 288, 24, 24)},
+                                  {},
+                                  {"start": False, "bet": 0, "text": [float('-inf'), ""],
+                                   "betting_on": False, "starttime": float('-inf')},
+                                    {"dist": 175})
     holding = pg.mouse.get_pressed()[0]
     pg.display.flip()
     clock.tick(FPS)

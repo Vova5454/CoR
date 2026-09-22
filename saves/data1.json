@@ -8,5 +8,8 @@
     "sat_on_couch_count": 0,
     "6Chips": false,
     "Ping-Pong_high_score": 0,
-    "legend": false
+    "legend": false,
+    "inventory": [],
+    "got_key": false,
+    "CasinoChips": 0
 }
