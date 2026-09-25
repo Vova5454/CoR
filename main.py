@@ -77,8 +77,11 @@ movement = {
                 "Arcade2": pg.Rect(750, 0, 50, 600)},
     "Arcade2": {"Arcade1": pg.Rect(0, 0, 50, 600)},
     "CasinoEntrance": {"DatCorner": pg.Rect(0, 550, 800,50),
-                       "Roulette": pg.Rect(241, 216, 268, 235)},
-    "Roulette": {}
+                       "Roulette": pg.Rect(241, 216, 268, 235),
+                       "CasinoSlot": pg.Rect(750, 0, 50, 600)},
+    "Roulette": {},
+    "CasinoSlot": {"CasinoEntrance": pg.Rect(0, 0, 50, 600)},
+    "LCE": {"LCPE": pg.Rect(0, 0, 800, 600)}
 }
 
 interactions = {
@@ -142,6 +145,7 @@ interactions = {
                 (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
+    "CasinoSlot": [(pg.Rect(309, 32, 191, 428), "CasinoSlot")] ##
 }
 
 images = {
@@ -179,12 +183,18 @@ images = {
     "pph": pg.image.load('res/ping_pong_him.png').convert_alpha(),
     "Arcade2": pg.image.load('res/arcade2.png').convert_alpha(),
     "CasinoEntrance": pg.image.load('res/CasinoEntrance.png').convert_alpha(),
-    "Roulette": pg.image.load('res/roulette.png').convert_alpha()
+    "Roulette": pg.image.load('res/roulette.png').convert_alpha(),
+    "CasinoSlot": pg.image.load('res/CasinoSlot.png').convert_alpha(),
+    "CSM": pg.image.load('res/CasinoSlotMachine.png').convert_alpha(),
+    "Casino/SlotMachine/empty": pg.image.load("res/Casino/SlotMachine/empty.png").convert_alpha(),
+    "LCE": pg.image.load("res/LCE.png")
 }
 
 font = pg.font.Font(None, 72)
 pg.mixer.init()
 explore = pg.image.load("res/map_explore_sign.png")
+left = pg.image.load("res/dummy_left.png")
+right = pg.image.load("res/dummy_right.png")
 errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
 
@@ -232,6 +242,7 @@ need_error = False
 plus = pg.image.load("res/dummy_plus.png")
 minus = pg.image.load("res/dummy_minus.png")
 frames = [pg.image.load(f'res/frames/{x}.png') for x in range(10)]
+casino_slots = [pg.image.load(f'res/casino/slotmachine/{x}.png') for x in range(20)]
 def animate(frame):
     frame += 1
     if frame == 10:
@@ -264,8 +275,8 @@ emergency = pg.mixer.Sound('res/sound/emergency.mp3')
 sprite_hit = pg.mixer.Sound('res/sound/hit.mp3')
 savem = False
 casino_font = pgft.SysFont("Bell MT", 24)
+tiny_casino_font = pgft.SysFont("Bell MT", 6)
 current = None
-aud = {"ct": False}
 framei = 0
 inspired = False
 ribbit = pg.mixer.Sound('res/sound/frog.mp3')
@@ -406,6 +417,8 @@ while run:
             if event.key == pg.K_9: pressing.add(9)
             if event.key == pg.K_BACKSPACE: pressing.add('backspace')
             if event.key == pg.K_MINUS: pressing.add('-')
+            if event.key == pg.K_CAPSLOCK: pressing.add('CAPSLOCK')
+            if event.key == pg.K_SPACE: pressing.add(' ')
         if event.type == pg.MOUSEBUTTONDOWN:
             if pg.mouse.get_pressed()[0] and not holding:
                 clciked = True
@@ -902,12 +915,35 @@ while run:
                                                   [None, None, ["Take", "Leave"]], pgft.SysFont(None, 24))
                         else:
                             dialogue = setup_dialogue(["Dumpster"])
+                    elif interaction == "CasinoSlot":
+                        game = setup_game("CasinoGame", 2, {}, {},
+                            {"slots": [None, None, None], "playing": False,
+                             "rolling": False, "bet": 1,
+                             "last_got_roll": float('-inf'),
+                             "typing": False, "finished": float('inf'),
+                             "text": [float('-inf'), "Message Here"]},
+                             {"def": FPS, "FPS": 166})
                     clciked = False
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
                 screen.blit(strongest, (107, 360))
             else:
                 screen.blit(strongest, (300, 200))
+        if current['loc'] == "Roulette" and not game['on']:
+            pg.draw.rect(screen, (64, 64, 64), pg.Rect(600, 400, 150, 50))
+            casino_font.render_to(screen, (610, 410), "EXIT", (186, 186, 186))
+            if pg.Rect(600, 400, 150, 50).collidepoint(mouse) and clciked:
+                current['loc'] = "CasinoEntrance"
+            pg.draw.rect(screen, (100, 100, 200), pg.Rect(600, 100, 150, 50))
+            casino_font.render_to(screen, (610, 110), "Start", (120, 50, 60))
+            if pg.Rect(600, 100, 150, 50).collidepoint(mouse) and clciked:
+                game = setup_game("CasinoGame", 1,
+                                  {"ball": pg.Rect(388, 288, 24, 24)},
+                                  {},
+                                  {"start": False, "bet": 0, "text": [float('-inf'), ""],
+                                   "betting_on": False, "starttime": float('-inf'),
+                                   },
+                                    {"dist": 175, "def": FPS, "FPS": float('inf')})
         if dialogue['on']:
             if not dialogue['name']:
                 pg.draw.rect(screen, (0, 0, 0), pg.Rect(50, 300, 700, 250))
@@ -1429,12 +1465,16 @@ while run:
                                 game['vars']['typed'] += 1
                             else:
                                 game['vars']['typed'] -= 5
-                        spcdfont.render_to(screen, (15, 115), str(round(game['vars']['typed']/(now-game['vars']['on'])*1000, 2)), (255, 255, 255))
-                        spcdfont.render_to(screen, (15, 15), game['vars']['word'], (255, 255, 255))
+                        spcdfont.render_to(screen, (15, 115),
+                            str(round(game['vars']['typed']/(now-game[
+                            'vars']['on'])*1000, 2)), (255, 255, 255))
+                        spcdfont.render_to(screen, (15, 15), game['vars']['word'],
+                                           (255, 255, 255))
 
                         
                     else:
-                        mmmfont.render_to(screen, (15, 15), "Type, correct letter gives +1. -5 if not.", (255, 255, 255))
+                        mmmfont.render_to(screen, (15, 15),
+                            "Type, correct letter gives +1. -5 if not.", (255, 255, 255))
                         if clciked:
                             game['vars']['on'] = now
             elif game['type'] == "Dummy!":
@@ -1613,8 +1653,6 @@ while run:
                                 if 'backspace' in pressing:
                                         ae[iadd[ia]] = 0
                         elif mso == "inspect_enemy":
-                            left = pg.image.load("res/dummy_left.png")
-                            right = pg.image.load("res/dummy_right.png")
                             pg.draw.rect(screen, (127, 0, 0), pg.Rect(0, 0, 150, 50))
                             fontf.render_to(screen, (10, 10), "Back", (255, 255, 255))
                             if pg.Rect(0, 0, 150, 50).collidepoint(mouse) and clciked:
@@ -1689,6 +1727,7 @@ while run:
                             if pg.Rect(35, 250, 150, 50).collidepoint(mouse) and clciked:
                                 game['vars']['betting_on'] = 'GREEN'
                             game['vars']['starttime'] = now
+                            FPS = game['consts']['FPS']
                         else:
                             if now - game['vars']['starttime'] < 1000:
                                 temp = pg.Rect(0, 0, 24, 24)
@@ -1697,6 +1736,7 @@ while run:
                                 game['objects']['ball'] = temp
                                 got = random.randint(0, 36)
                             else:
+                                FPS = game['consts']['def']
                                 if got == 0:
                                     gott = 'GREEN'
                                 elif got % 2:
@@ -1717,7 +1757,6 @@ while run:
                                 game['vars']['start'] = False
                                 
                     else:
-                        game['objects']['ball'] = pg.Rect(388, 288, 24, 24)
                         casino_font.render_to(screen, (610, 50),
                             f'Chips: {str(current['CasinoChips'])}')
                         pg.draw.rect(screen, (20, 50, 50), pg.Rect(600, 400, 150, 50))
@@ -1752,20 +1791,153 @@ while run:
                         casino_font.render_to(screen, (300, 200),
                         game['vars']['text'][1], (255, 255, 255))
                     pg.draw.ellipse(screen, (255, 255, 255), game['objects']['ball'])
-        if current['loc'] == "Roulette" and not game['on']:
-            pg.draw.rect(screen, (64, 64, 64), pg.Rect(600, 400, 150, 50))
-            casino_font.render_to(screen, (610, 410), "EXIT", (186, 186, 186))
-            if pg.Rect(600, 400, 150, 50).collidepoint(mouse) and clciked:
-                current['loc'] = "CasinoEntrance"
-            pg.draw.rect(screen, (100, 100, 200), pg.Rect(600, 100, 150, 50))
-            casino_font.render_to(screen, (610, 110), "Start", (120, 50, 60))
-            if pg.Rect(600, 100, 150, 50).collidepoint(mouse) and clciked:
-                game = setup_game("CasinoGame", 1,
-                                  {"ball": pg.Rect(388, 288, 24, 24)},
-                                  {},
-                                  {"start": False, "bet": 0, "text": [float('-inf'), ""],
-                                   "betting_on": False, "starttime": float('-inf')},
-                                    {"dist": 175})
+                elif game['ID'] == 2:
+                    FPS = game['consts']['FPS']
+                    screen.blit(images['CSM'], (0, 0))
+                    if not game['vars']['rolling']:
+                        if None in game['vars']['slots']:
+                            pg.draw.rect(screen, (196, 196, 196), pg.Rect(760, 580, 30, 10))
+                            screen.blit(images['Casino/SlotMachine/empty'], (180, 150))
+                            screen.blit(images['Casino/SlotMachine/empty'], (330, 150))
+                            screen.blit(images['Casino/SlotMachine/empty'], (480, 150))
+                            tiny_casino_font.render_to(screen, (762, 582), "EXIT", (255, 255, 255))
+                            pg.draw.rect(screen, (255, 255, 255), pg.Rect(300, 45, 200, 50))
+                            casino_font.render_to(screen, (370, 62), "Start!", (0, 0, 0))
+                            if len(str(game['vars']['bet'])) > 13:
+                                casino_font.render_to(screen, (10, 45),
+                                f'{str(game['vars']['bet'])[:12]}...')
+                            else:
+                                casino_font.render_to(screen, (10, 45),
+                                                    str(game['vars']['bet'])[:13])
+                            casino_font.render_to(screen, (10, 10), "Bet:")
+                            if pg.Rect(760, 580, 30, 10).collidepoint(mouse) and clciked:
+                                FPS = game['consts']['def']
+                                game['on'] = False
+                            if (pg.Rect(300, 45, 200, 50).collidepoint(
+                                mouse) and clciked) or (' ' in pressing):
+                                if game['vars']['bet'] < current['CasinoChips']:
+                                    game['vars']['rolling'] = True
+                                else:
+                                    game['vars']['text'] = [now+1000, "Insufficient Funds"]
+                            pg.draw.rect(screen, (120, 120, 120), pg.Rect(10, 500, 120, 50))
+                            casino_font.render_to(screen, (20, 510), "TYPING", (255, 255, 255))
+                            if clciked:
+                                if pg.Rect(10, 500, 120, 50).collidepoint(mouse):
+                                    game['vars']['typing'] = True
+                                else:
+                                    game['vars']['typing'] = False
+                            if game['vars']['typing']:
+                                for pressed in pressing:
+                                    if pressed == 'backspace':
+                                        game['vars']['bet'] //= 10
+                                        if not game['vars']['bet']:
+                                            game['vars']['bet'] = 1
+                                    elif pressed == '-':
+                                        continue
+                                    elif pressed == 'CAPSLOCK':
+                                        game['vars']['bet'] = 1
+                                    elif pressed == ' ':
+                                        continue
+                                    else:
+                                        game['vars']['bet'] *= 10
+                                        game['vars']['bet'] += pressed
+                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(10, 150, 120, 50))
+                            casino_font.render_to(screen, (55, 165), "x2", (255, 255, 255))
+                            if pg.Rect(10, 150, 120, 50).collidepoint(mouse) and clciked:
+                                game['vars']['bet'] *= 2
+                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(10, 250, 120, 50))
+                            casino_font.render_to(screen, (55, 265), "x5", (255, 255, 255))
+                            if pg.Rect(10, 250, 120, 50).collidepoint(mouse) and clciked:
+                                game['vars']['bet'] *= 5
+                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(10, 350, 120, 50))
+                            casino_font.render_to(screen, (50, 365), "x10", (255, 255, 255))
+                            if pg.Rect(10, 350, 120, 50).collidepoint(mouse) and clciked:
+                                game['vars']['bet'] *= 10
+                        else:
+                            if now - game['vars']['finished'] > 250:
+                                game['vars']['slots'] = [None, None, None]
+                            if game['vars']['unfinished']:
+                                game['vars']['unfinished'] = False
+                                if len(set(game['vars']['slots'])) == 3:
+                                    current['CasinoChips'] -= game['vars']['bet']
+                                    game['vars']['text'] = [now+1000, f"You lost ${game['vars']['bet']}"]
+                                elif len(set(game['vars']['slots'])) == 1:
+                                    for slot in game['vars']['slots']:
+                                        actm = slot
+                                    print("HRT")
+                                    print(game['vars']['slots'])
+                                    if actm == 19:
+                                        current['CasinoChips'] += 5000*game['vars']['bet']
+                                        game['vars']['text'] = [now+2500,
+                                        f"YOU HIT THE JACKPOT! {5000*game['vars']['bet']}"]
+                                    elif actm in [15, 16, 17, 18]:
+                                        current['CasinoChips'] += 99*game['vars']['bet']
+                                        game['vars']['text'] = [now+2000,
+                                            f"You won ${100*game['vars']['bet']}!"]
+                                    else:
+                                        mystery_mult = random.uniform(9, 19)
+                                        current['CasinoChips'] += int(game['vars'][
+                                        'bet']*mystery_mult)
+                                        game['vars']['text'] = [now+1500,
+                                        f"You won ${int((mystery_mult+1)*game['vars']['bet'])}"]
+                                    
+                                else:
+                                    if game['vars']['slots'][0] == game['vars']['slots'][1]:
+                                        actm = game['vars']['slots'][0]
+                                        proceed = True
+                                    else:
+                                        actm = 20
+                                        proceed = False
+                                    if actm == 19:
+                                        current['CasinoChips'] += game['vars']['bet']*4
+                                        game['vars']['text'] = [now+1200,
+                                            f"You won ${game['vars']['bet']*5}!"]
+                                    elif proceed:
+                                        mystery_mult = random.uniform(0, 1)
+                                        current['CasinoChips'] += int(game[
+                                        'vars']['bet']*mystery_mult)
+                                        game['vars']['text'] = [now+1050,
+                                            f"You won ${int(game['vars']['bet']*(mystery_mult+1))}!"]
+                                        int(game['vars']['bet']*(mystery_mult+1))
+                                    else:
+                                        myst_mult = random.uniform(0, 0.5)
+                                        current['CasinoChips'] += int(game['vars'][
+                                            'bet']*myst_mult)
+                                        game['vars']['text'] = [now+750,
+                                            f"You won ${int(myst_mult*game['vars']['bet'])}!"]
+                                save(savefile, current)
+                    else:
+                        if game['vars']['slots'][0] or game['vars']['slots'][0] == 0:
+                            screen.blit(casino_slots[game['vars']['slots'][0]], (180, 150))
+                        else:
+                            screen.blit(casino_slots[now%20], (180, 150))
+                        if game['vars']['slots'][1] or game['vars']['slots'][1] == 0:
+                            screen.blit(casino_slots[game['vars']['slots'][1]], (330, 150))
+                        else:
+                            screen.blit(casino_slots[(now+3)%20], (330, 150))
+                        if game['vars']['slots'][2] or game['vars']['slots'][2] == 0:
+                            screen.blit(casino_slots[game['vars']['slots'][2]], (480, 150))
+                        else:
+                            screen.blit(casino_slots[(now+7)%20], (480, 150))
+                        if not None in game['vars']['slots'] and now > game[
+                            'vars']['last_got_roll']:
+                            game['vars']['rolling'] = False
+                            game['vars']['finished'] = now
+                            game['vars']['unfinished'] = True
+                        else:
+                            if ' ' in pressing:
+                                spci = 0
+                                for slot in game['vars']['slots']:
+                                    if slot is None:
+                                        game['vars']['slots'][spci] = now%20
+                                        game['vars']['last_got_roll'] = now+500
+                                        break
+                                    spci += 1
+
+                            
+                    if now < game['vars']['text'][0]:
+                        casino_font.render_to(screen, (200, 50), game['vars']['text'][1])
+
     holding = pg.mouse.get_pressed()[0]
     pg.display.flip()
     clock.tick(FPS)
