@@ -80,7 +80,9 @@ movement = {
                        "Roulette": pg.Rect(241, 216, 268, 235),
                        "CasinoSlot": pg.Rect(750, 0, 50, 600)},
     "Roulette": {},
-    "CasinoSlot": {"CasinoEntrance": pg.Rect(0, 0, 50, 600)},
+    "CasinoSlot": {"CasinoEntrance": pg.Rect(0, 0, 50, 600),
+                   "CasinoBlackjack": pg.Rect(750, 0, 50, 600)},
+    "CasinoBlackjack": {"CasinoSlot": pg.Rect(0, 0, 50, 600)},
     "LCE": {"LCPE": pg.Rect(0, 0, 800, 600)}
 }
 
@@ -140,12 +142,13 @@ interactions = {
     "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH"), ##
                   (pg.Rect(231, 270, 146, 131), "chips")], ##
     "DatCornerR": [(pg.Rect(449, 168, 113, 168), "EnterRestuarant")], ##
-    "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")], ##
+    "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")],
     "Arcade1": [(pg.Rect(96, 153, 115, 286), "ArcadeGame1"),
                 (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
-    "CasinoSlot": [(pg.Rect(309, 32, 191, 428), "CasinoSlot")] ##
+    "CasinoSlot": [(pg.Rect(309, 32, 191, 428), "CasinoSlot")],
+    "CasinoBlackjack": [(pg.Rect(139, 138, 472, 288), "Blackjack")]
 }
 
 images = {
@@ -187,7 +190,8 @@ images = {
     "CasinoSlot": pg.image.load('res/CasinoSlot.png').convert_alpha(),
     "CSM": pg.image.load('res/CasinoSlotMachine.png').convert_alpha(),
     "Casino/SlotMachine/empty": pg.image.load("res/Casino/SlotMachine/empty.png").convert_alpha(),
-    "LCE": pg.image.load("res/LCE.png")
+    "LCE": pg.image.load("res/LCE.png").convert_alpha(),
+    "CasinoBlackjack": pg.image.load("res/CasinoBlackjack.png").convert_alpha()
 }
 
 font = pg.font.Font(None, 72)
@@ -243,6 +247,8 @@ plus = pg.image.load("res/dummy_plus.png")
 minus = pg.image.load("res/dummy_minus.png")
 frames = [pg.image.load(f'res/frames/{x}.png') for x in range(10)]
 casino_slots = [pg.image.load(f'res/casino/slotmachine/{x}.png') for x in range(20)]
+blackjack_deck = [pg.image.load(f'res/casino/blackjack/{x}.png') for x in range(52)]
+blackjack_deck.append(pg.image.load('res/casino/blackjack/empty.png'))
 def animate(frame):
     frame += 1
     if frame == 10:
@@ -923,6 +929,18 @@ while run:
                              "typing": False, "finished": float('inf'),
                              "text": [float('-inf'), "Message Here"]},
                              {"def": FPS, "FPS": 166})
+                    elif interaction == "Blackjack":
+                        deck = list(range(52))
+                        random.shuffle(deck)
+                        game = setup_game("CasinoGame", 3, {"deck": deck}, {},
+                            {"YC": [], "HC": [], "read": False, "bet": 0,
+                             "lmm": float('-inf'), "text": [float('-inf'), "Message"],
+                             "playing": False, "end": False})
+                    elif interaction == "chips":
+                        dialogue = setup_dialogue([
+                        "Since there is no way to obtain Casino Chips yet I shall give them out",
+                        "Do you want some Casino Chips?", None], 6, [None, None, ["Yes", "No"]],
+                        name="Chip Dealer") # TEMPE
                     clciked = False
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
@@ -1001,6 +1019,9 @@ while run:
                             current['inventory'].append("key")
                             current['got_key'] = True
                             dialogue['text'].append("You got the key.")
+                    elif dialogue['diaID'] == 6:
+                        if dialogue['responses'][-1] == 0:
+                            game = setup_game("TEMPE", None, {"WTR": 1})
                     dialogue['JSR'] = False
                 try:
                     opt_split = dialogue['text'][dialogue['processID']]
@@ -1864,8 +1885,6 @@ while run:
                                 elif len(set(game['vars']['slots'])) == 1:
                                     for slot in game['vars']['slots']:
                                         actm = slot
-                                    print("HRT")
-                                    print(game['vars']['slots'])
                                     if actm == 19:
                                         current['CasinoChips'] += 5000*game['vars']['bet']
                                         game['vars']['text'] = [now+2500,
@@ -1934,10 +1953,218 @@ while run:
                                         break
                                     spci += 1
 
-                            
                     if now < game['vars']['text'][0]:
                         casino_font.render_to(screen, (200, 50), game['vars']['text'][1])
-
+                elif game['ID'] == 3:
+                    if game['vars']['read']:
+                        screen.fill((255, 255, 255))
+                        if game['vars']['playing']:
+                            if not game['vars']['YC']:
+                                game['vars']['YC'] = [game['objects']['deck'].pop(),
+                                                      game['objects']['deck'].pop()]
+                                game['vars']['HC'] = [game['objects']['deck'].pop(),
+                                                      game['objects']['deck'].pop()]
+                            if len(game['vars']['YC']) == 2:
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(407, 335, 160, 260))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(233, 335, 160, 260))
+                                screen.blit(blackjack_deck[game['vars']['YC'][0]], (412, 340))
+                                screen.blit(blackjack_deck[game['vars']['YC'][1]], (238, 340))
+                            else:
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(320, 335, 160, 260))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(145, 335, 160, 260))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(495, 335, 160, 260))
+                                screen.blit(blackjack_deck[game['vars']['YC'][0]], (325, 340))
+                                screen.blit(blackjack_deck[game['vars']['YC'][1]], (150, 340))
+                                screen.blit(blackjack_deck[game['vars']['YC'][2]], (500, 340))
+                            if len(game['vars']['HC']) == 2:
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(407, 5, 160, 260))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(233, 5, 160, 260))
+                                screen.blit(blackjack_deck[game['vars']['HC'][0]], (412, 10))
+                                if game['vars']['lmm'] == float('-inf'):
+                                    screen.blit(blackjack_deck[52], (238, 10))
+                                else:
+                                    screen.blit(blackjack_deck[game['vars']['HC'][1]], (238, 10))
+                            else:
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(320, 5, 160, 260))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(145, 5, 160, 260))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(495, 5, 160, 260))
+                                screen.blit(blackjack_deck[game['vars']['HC'][0]], (325, 10))
+                                screen.blit(blackjack_deck[game['vars']['HC'][1]], (150, 10))
+                                screen.blit(blackjack_deck[game['vars']['HC'][2]], (500, 10))
+                            if not game['vars']['end']:
+                                if (len(game['vars']['YC']), len(game['vars']['HC'])) == (2, 2):
+                                    if game['vars']['lmm'] == float('-inf'):
+                                        pg.draw.rect(screen, (0, 0, 0), pg.Rect(200, 275, 150, 50))
+                                        pg.draw.rect(screen, (0, 0, 0), pg.Rect(450, 275, 150, 50))
+                                        casino_font.render_to(screen, (205, 280), "DRAW", (255, 255, 255))
+                                        casino_font.render_to(screen, (455, 280), "DON'T", (255, 255, 255))
+                                        if pg.Rect(200, 275, 150, 50).collidepoint(mouse) and clciked:
+                                            game['vars']['YC'].append(game['objects']['deck'].pop())
+                                            game['vars']['lmm'] = now
+                                        if pg.Rect(450, 275, 150, 50).collidepoint(mouse) and clciked:
+                                            game['vars']['lmm'] = now
+                                    else:
+                                        if now - game['vars']['lmm'] >= 500:
+                                            thysum = 0
+                                            for card in game['vars']['HC']:
+                                                if card % 13 < 10:
+                                                    thysum += card%13 + 1
+                                                else:
+                                                    thysum += 10
+                                            if 0 in game['vars']['HC']:
+                                                thysum += 10
+                                            if thysum <= 16:
+                                                game['vars']['HC'].append(game['objects']['deck'].pop())
+                                            game['vars']['end'] = True
+                                            game['vars']['lmm'] = now
+                                if (len(game['vars']['YC']), len(game['vars']['HC'])) == (3, 2):
+                                    if now - game['vars']['lmm'] >= 500:
+                                        thysum = 0
+                                        thyace = False
+                                        for card in game['vars']['HC']:
+                                            if card % 13 < 10:
+                                                thysum += card%13 + 1
+                                                if card%13 == 0:
+                                                    thyace = True
+                                            else:
+                                                thysum += 10
+                                        if thyace: thysum += 10
+                                        if thysum <= 16:
+                                            game['vars']['HC'].append(game['objects']['deck'].pop())
+                                        game['vars']['end'] = True
+                                        game['vars']['lmm'] = now
+                            else:
+                                your_sum = 0
+                                your_aces = 0
+                                their_sum = 0
+                                their_aces = 0
+                                for card in game['vars']['YC']:
+                                    if card%13 < 10:
+                                        your_sum += card%13 + 1
+                                        if card%13 == 0: your_aces += 1
+                                    else:
+                                        your_sum += 10
+                                if your_aces: your_sum += 10
+                                if your_sum > 21 and your_aces: your_sum -= 10
+                                for card in game['vars']['HC']:
+                                    if card%13 < 10:
+                                        their_sum += card%13+1
+                                        if card%13 == 0: their_aces += 1
+                                    else:
+                                        their_sum += 10
+                                if their_aces: their_sum += 10
+                                if their_sum > 21 and their_aces: their_sum -= 10
+                                casino_font.render_to(screen, (10, 10), str(their_sum))
+                                casino_font.render_to(screen, (770, 575), str(your_sum))
+                                if now - game['vars']['lmm'] > 1750:
+                                    self_sum = 0
+                                    self_aces = 0
+                                    his_sum = 0
+                                    his_aces = 0
+                                    for card in game['vars']['YC']:
+                                        if card%13 < 10 and card%13:
+                                            self_sum += card%13+1
+                                        else:
+                                            if card%13:
+                                                self_sum += 10
+                                            else:
+                                                self_aces += 1
+                                                self_sum += 1
+                                    if self_aces and 21-self_sum>=10: self_sum += 10
+                                    for card in game['vars']['HC']:
+                                        if card%13 < 10 and card%13:
+                                            his_sum += card%13+1
+                                        else:
+                                            if card%13:
+                                                his_sum += 10
+                                            else:
+                                                his_aces += 1
+                                                his_sum += 1
+                                    if his_aces and 21-his_sum>=10: his_sum += 10
+                                    if self_sum > 21 and his_sum > 21:
+                                        current['CasinoChips'] -= game['vars']['bet']
+                                        game['vars']['text'] = [now+1500,
+                                        f"Technically you went over 21 first... -${game['vars']['bet']}"]
+                                    elif self_sum > 21:
+                                        current['CasinoChips'] -= game['vars']['bet']
+                                        game['vars']['text'] = [now+1000,
+                                        f"You went over 21... -${game['vars']['bet']}"]
+                                    elif 21-self_sum < 21-his_sum:
+                                        if self_sum == 21 and len(game['vars']['YC']) == 2:
+                                            temp = int(1.5*game['vars']['bet'])
+                                            current['CasinoChips'] += temp
+                                            game['vars']['text'] = [now+2000,
+                                            f"1.5x bonus! First 2 cards are 21! +${temp}"]
+                                        else:
+                                            current['CasinoChips'] += game['vars']['bet']
+                                            game['vars']['text'] = [now+1200,
+                                            f"You're closer to 21! +${game['vars']['bet']}"]
+                                    elif his_sum > 21:
+                                        current['CasinoChips'] += game['vars']['bet']
+                                        game['vars']['text'] = [now+1750,
+                                        f"You won! Dealer went over 21. +${game['vars']['bet']}"]
+                                    elif 21-self_sum == 21-his_sum:
+                                        game['vars']['text'] = [now+1000, "Tie!"]
+                                    else:
+                                        current['CasinoChips'] -= game['vars']['bet']
+                                        game['vars']['text'] = [now+1000,
+                                        f"The dealer was closer to 21... -${game['vars']['bet']}"]
+                                    game['vars']['YC'] = []
+                                    game['vars']['HC'] = []
+                                    game['vars']['playing'] = False
+                                    game['vars']['lmm'] = float('-inf')
+                                    game['vars']['end'] = False
+                                    deck = list(range(52))
+                                    random.shuffle(deck)
+                                    game['objects']['deck'] = deck
+                                    save(savefile, current)
+                        
+                        else:
+                            pg.draw.rect(screen, (127, 127, 127), pg.Rect(10, 10, 150, 50))
+                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(10, 70, 150, 50))
+                            casino_font.render_to(screen, (20, 80), "EXIT", (255, 255, 255))
+                            casino_font.render_to(screen, (15, 15), str(game['vars']['bet']),
+                                (255, 255, 255))
+                            casino_font.render_to(screen, (170, 10), str(current['CasinoChips']))
+                            if pg.Rect(10, 10, 150, 50).collidepoint(mouse) and clciked:
+                                if game['vars']['bet'] <= current['CasinoChips']:
+                                    game['vars']['playing'] = True
+                                else:
+                                    game['vars']['text'] = [now+1000, "You're too broke."]
+                            if pg.Rect(10, 70, 150, 50).collidepoint(mouse) and clciked:
+                                game['on'] = False
+                            for key in pressing:
+                                if key in ['CAPSLOCK', ' ', '-']: continue
+                                if key == 'backspace':
+                                    game['vars']['bet'] = 0
+                                else:
+                                    game['vars']['bet'] *= 10
+                                    game['vars']['bet'] += key
+                        if now < game['vars']['text'][0]:
+                            casino_font.render_to(screen, (10, 280), game['vars']['text'][1])
+                    else:
+                        screen.fill((0, 0, 0))
+                        casino_font.render_to(screen, (10, 10), "Rules here", (255, 255, 255))
+                        if clciked:
+                            game['vars']['read'] = True
+            elif game['type'] == "TEMPE":
+                screen.fill((0, 0, 0))
+                casino_font.render_to(screen, (10, 10), str(game['objects']['WTR']), (255, 255, 255))
+                for key in pressing:
+                    if key in ['CAPSLOCK', '-', ' ']: continue
+                    if key == 'backspace':
+                        game['objects']['WTR'] = 0
+                    else:
+                        game['objects']['WTR'] *= 10
+                        game['objects']['WTR'] += key
+                casino_font.render_to(screen, (10, 60),
+                    f"Your Casino Chips: ${current['CasinoChips']}", (255, 255, 255))
+                pg.draw.rect(screen, (255, 255, 255), pg.Rect(10, 110, 150, 50))
+                casino_font.render_to(screen, (20, 120), "Recieve")
+                if pg.Rect(10, 110, 150, 50).collidepoint(mouse) and clciked:
+                    current['CasinoChips'] += game['objects']['WTR']
+                if keys[pg.K_ESCAPE]: game['on'] = False
+                casino_font.render_to(screen, (10, 250), "ESC to exit", (255, 255, 255))
     holding = pg.mouse.get_pressed()[0]
     pg.display.flip()
     clock.tick(FPS)
