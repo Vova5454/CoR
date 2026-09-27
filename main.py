@@ -2089,7 +2089,7 @@ while run:
                                         current['CasinoChips'] -= game['vars']['bet']
                                         game['vars']['text'] = [now+1000,
                                         f"You went over 21... -${game['vars']['bet']}"]
-                                    elif 21-self_sum < 21-his_sum:
+                                    elif 21-self_sum < abs(21-his_sum):
                                         if self_sum == 21 and len(game['vars']['YC']) == 2:
                                             temp = int(1.5*game['vars']['bet'])
                                             current['CasinoChips'] += temp
