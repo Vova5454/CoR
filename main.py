@@ -77,7 +77,7 @@ movement = {
                 "Arcade2": pg.Rect(750, 0, 50, 600)},
     "Arcade2": {"Arcade1": pg.Rect(0, 0, 50, 600)},
     "CasinoEntrance": {"DatCorner": pg.Rect(0, 550, 800,50),
-                       "Roulette": pg.Rect(241, 216, 268, 235),
+                       "Roulette": pg.Rect(241, 216, 255, 255),
                        "CasinoSlot": pg.Rect(750, 0, 50, 600)},
     "Roulette": {},
     "CasinoSlot": {"CasinoEntrance": pg.Rect(0, 0, 50, 600),
@@ -281,6 +281,7 @@ emergency = pg.mixer.Sound('res/sound/emergency.mp3')
 sprite_hit = pg.mixer.Sound('res/sound/hit.mp3')
 savem = False
 casino_font = pgft.SysFont("Bell MT", 24)
+medium_casino_font = pgft.SysFont("Bell MT", 18)
 tiny_casino_font = pgft.SysFont("Bell MT", 6)
 current = None
 framei = 0
@@ -960,8 +961,9 @@ while run:
                                   {},
                                   {"start": False, "bet": 0, "text": [float('-inf'), ""],
                                    "betting_on": False, "starttime": float('-inf'),
-                                   },
+                                   "ISTM": False, "toast": [False for _ in range(37)]},
                                     {"dist": 175, "def": FPS, "FPS": float('inf')})
+                clciked = False
         if dialogue['on']:
             if not dialogue['name']:
                 pg.draw.rect(screen, (0, 0, 0), pg.Rect(50, 300, 700, 250))
@@ -1733,20 +1735,72 @@ while run:
                 if game['ID'] == 1:
                     if game['vars']['start']:
                         if not game['vars']['betting_on']:
-                            casino_font.render_to(screen, (610, 50),
-                                f'Bet: {game['vars']['bet']}', (0, 0, 0))
-                            pg.draw.rect(screen, (255, 0, 0), pg.Rect(35, 50, 150, 50))
-                            casino_font.render_to(screen, (45, 60), "RED", (0, 255, 255))
-                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(35, 150, 150, 50))
-                            casino_font.render_to(screen, (45, 160), "BLACK", (255, 255, 255))
-                            pg.draw.rect(screen, (0, 255, 0), pg.Rect(35, 250, 150, 50))
-                            casino_font.render_to(screen, (45, 260), "GREEN", (255, 0, 255))
-                            if pg.Rect(35, 50, 150, 50).collidepoint(mouse) and clciked:
-                                game['vars']['betting_on'] = 'RED'
-                            if pg.Rect(35, 150, 150, 50).collidepoint(mouse) and clciked:
-                                game['vars']['betting_on'] = 'BLACK'
-                            if pg.Rect(35, 250, 150, 50).collidepoint(mouse) and clciked:
-                                game['vars']['betting_on'] = 'GREEN'
+                            if not game['vars']['ISTM']:
+                                casino_font.render_to(screen, (610, 50),
+                                    f'Bet: {game['vars']['bet']}', (0, 0, 0))
+                                pg.draw.rect(screen, (255, 0, 0), pg.Rect(35, 50, 150, 50))
+                                casino_font.render_to(screen, (45, 60), "RED", (0, 255, 255))
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(35, 150, 150, 50))
+                                casino_font.render_to(screen, (45, 160), "BLACK", (255, 255, 255))
+                                pg.draw.rect(screen, (0, 255, 0), pg.Rect(35, 250, 150, 50))
+                                casino_font.render_to(screen, (45, 260), "GREEN", (255, 0, 255))
+                                pg.draw.rect(screen, (63, 63, 196), pg.Rect(35, 350, 150, 50))
+                                casino_font.render_to(screen, (45, 360), "CUSTOM", (127, 127, 196))
+                                if pg.Rect(35, 350, 150, 50).collidepoint(mouse) and clciked:
+                                    game['vars']['ISTM'] = True
+                                if pg.Rect(35, 50, 150, 50).collidepoint(mouse) and clciked:
+                                    game['vars']['betting_on'] = 'RED'
+                                if pg.Rect(35, 150, 150, 50).collidepoint(mouse) and clciked:
+                                    game['vars']['betting_on'] = 'BLACK'
+                                if pg.Rect(35, 250, 150, 50).collidepoint(mouse) and clciked:
+                                    game['vars']['betting_on'] = 'GREEN'
+                            else:
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(35, 50, 25, 25))
+                                medium_casino_font.render_to(screen, (35, 50),
+                                "37", (255, 255, 255))
+                                for simfcro in range(37):
+                                    if simfcro < 18:
+                                        if not game['vars']['toast'][simfcro]:
+                                            pg.draw.rect(screen, (0, 0, 0), pg.Rect(35,
+                                            50+simfcro*25, 25, 25))
+                                        else:
+                                            pg.draw.rect(screen, (196, 196, 196), pg.Rect(35,
+                                            50+simfcro*25, 25, 25))              
+                                        medium_casino_font.render_to(screen, (37,
+                                        52+simfcro*25), f"{simfcro+1}", (255, 255, 255))
+                                    elif simfcro < 36:
+                                        if not game['vars']['toast'][simfcro]:
+                                            pg.draw.rect(screen, (255, 0, 0), pg.Rect(85,
+                                            50+simfcro%18*25, 25, 25))
+                                        else:
+                                            pg.draw.rect(screen, (255, 196, 196), pg.Rect(85,
+                                            50+simfcro%18*25, 25, 25))              
+                                        medium_casino_font.render_to(screen, (87,
+                                        52+simfcro%18*25), f"{simfcro+1}", (255, 255, 255))
+                                    else:
+                                        if game['vars']['toast'][36]:
+                                            pg.draw.rect(screen, (196, 255, 196),
+                                            pg.Rect(135, 50, 25, 25))
+                                            medium_casino_font.render_to(screen, (137, 52),
+                                            "37", (255, 255, 255))
+                                        else:
+                                            pg.draw.rect(screen, (0, 255, 0),
+                                            pg.Rect(135, 50, 25, 25))
+                                            medium_casino_font.render_to(screen, (137, 52),
+                                            "37", (255, 255, 255))
+                                    if pg.Rect(35+simfcro//18*50, 50+(simfcro%18)*25, 25, 25).collidepoint(
+                                        mouse) and clciked:
+                                        game['vars']['toast'][simfcro] ={
+                                        True: False, False: True}[game['vars']['toast'][simfcro]]
+                                casino_font.render_to(screen, (50, 20), "Each Slot costs your bet.")
+                                pg.draw.rect(screen, (0, 0, 0), pg.Rect(600, 100, 150, 50))
+                                casino_font.render_to(screen, (610, 110), "START", (255, 255, 255))
+                                if pg.Rect(600, 100, 150, 50).collidepoint(mouse) and clciked:
+                                    if len([0 for x in game['vars']['toast'] if x])*game[
+                                        'vars']['bet'] <= current['CasinoChips']:
+                                        game['vars']['betting_on'] = 'TOAST'
+                                    else:
+                                        game['vars']['text'] = [now, "You're too broke!"]
                             game['vars']['starttime'] = now
                             FPS = game['consts']['FPS']
                         else:
@@ -1764,16 +1818,38 @@ while run:
                                     gott = 'RED'
                                 else:
                                     gott = 'BLACK'
-                                if gott != game['vars']['betting_on']:
-                                    current['CasinoChips'] -= game['vars']['bet']
-                                    game['vars']['text'] = [now, f"{gott}... You lose ${game['vars']['bet']}"]
-                                else:
-                                    if gott == 'GREEN':
-                                        current['CasinoChips'] += 36*game['vars']['bet']
-                                        game['vars']['text'] = [now, f"{gott}! You won ${36*game['vars']['bet']}"]
+                                if game['vars']['betting_on'] != 'TOAST':
+                                    if gott != game['vars']['betting_on']:
+                                        current['CasinoChips'] -= game['vars']['bet']
+                                        game['vars']['text'] = [now, f"{gott}... You lose ${game['vars']['bet']}"]
                                     else:
-                                        current['CasinoChips'] += game['vars']['bet']
-                                        game['vars']['text'] = [now, f"{gott}! You won ${game['vars']['bet']}"]
+                                        if gott == 'GREEN':
+                                            current['CasinoChips'] += 35*game['vars']['bet']
+                                            game['vars']['text'] = [now, f"{gott}! You won ${35*game['vars']['bet']}"]
+                                        else:
+                                            current['CasinoChips'] += game['vars']['bet']
+                                            game['vars']['text'] = [now, f"{gott}! You won ${game['vars']['bet']}"]
+                                else:
+                                    temp = len([0 for x in game['vars']['toast'] if x])
+                                    temp_cost = temp*game['vars']['bet']
+                                    current['CasinoChips'] -= temp_cost
+                                    temp_hit = False
+                                    if game['vars']['toast'][got]:
+                                        current['CasinoChips'] += 36*game['vars']['bet']
+                                        temp_hit = True
+                                    temp_won = (36-temp)*game['vars']['bet']
+                                    if temp == 37:
+                                        game['vars']['text'] = [now,
+                                        f"{got}. You lost ${game['vars']['bet']}."]
+                                    elif temp == 36 and temp_hit:
+                                        game['vars']['text'] = [now, f"{got}. Well you didn't get anything."]
+                                    elif temp == 36 and not temp_hit:
+                                        game['vars']['text'] = [now, f"{got}. You lost ${game['vars']['bet']}..."]
+                                    elif temp_hit:
+                                        game['vars']['text'] = [now, f"{got}. You won ${temp_won}!"]
+                                    else:
+                                        game['vars']['text'] = [now, f"{got}. You lost ${temp_cost}..."]
+                                game['vars']['ISTM'] = False
                                 save(savefile, current)
                                 game['vars']['start'] = False
                                 
@@ -1809,8 +1885,8 @@ while run:
                         if 9 in pressing: game['vars']['bet'] += '9'
                         game['vars']['bet'] = int(game['vars']['bet'])
                     if now - game['vars']['text'][0] < 1500:
-                        casino_font.render_to(screen, (300, 200),
-                        game['vars']['text'][1], (255, 255, 255))
+                        casino_font.render_to(screen, (200, 50), 
+                        game['vars']['text'][1], (0, 0, 0))
                     pg.draw.ellipse(screen, (255, 255, 255), game['objects']['ball'])
                 elif game['ID'] == 2:
                     FPS = game['consts']['FPS']
@@ -2011,8 +2087,10 @@ while run:
                                                     thysum += card%13 + 1
                                                 else:
                                                     thysum += 10
-                                            if 0 in game['vars']['HC']:
-                                                thysum += 10
+                                            if 0 in game['vars']['HC']: thysum += 10
+                                            elif 13 in game['vars']['HC']: thysum += 10
+                                            elif 26 in game['vars']['HC']: thysum += 10
+                                            elif 39 in game['vars']['HC']: thysum += 10
                                             if thysum <= 16:
                                                 game['vars']['HC'].append(game['objects']['deck'].pop())
                                             game['vars']['end'] = True
@@ -2089,7 +2167,7 @@ while run:
                                         current['CasinoChips'] -= game['vars']['bet']
                                         game['vars']['text'] = [now+1000,
                                         f"You went over 21... -${game['vars']['bet']}"]
-                                    elif 21-self_sum < 21-his_sum:
+                                    elif 21-self_sum < abs(21-his_sum):
                                         if self_sum == 21 and len(game['vars']['YC']) == 2:
                                             temp = int(1.5*game['vars']['bet'])
                                             current['CasinoChips'] += temp
