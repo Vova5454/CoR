@@ -247,6 +247,7 @@ plus = pg.image.load("res/dummy_plus.png")
 minus = pg.image.load("res/dummy_minus.png")
 frames = [pg.image.load(f'res/frames/{x}.png') for x in range(10)]
 casino_slots = [pg.image.load(f'res/casino/slotmachine/{x}.png') for x in range(20)]
+dsvcs = [pg.image.load(f'res/casino/slotmachine/v/{x}.png') for x in range(20)]
 blackjack_deck = [pg.image.load(f'res/casino/blackjack/{x}.png') for x in range(52)]
 blackjack_deck.append(pg.image.load('res/casino/blackjack/empty.png'))
 def animate(frame):
@@ -928,7 +929,8 @@ while run:
                              "rolling": False, "bet": 1,
                              "last_got_roll": float('-inf'),
                              "typing": False, "finished": float('inf'),
-                             "text": [float('-inf'), "Message Here"]},
+                             "text": [float('-inf'), "Message Here"],
+                             "effect": [False, "None"]},
                              {"def": FPS, "FPS": 166})
                     elif interaction == "Blackjack":
                         deck = list(range(52))
@@ -1842,13 +1844,13 @@ while run:
                                         game['vars']['text'] = [now,
                                         f"{got}. You lost ${game['vars']['bet']}."]
                                     elif temp == 36 and temp_hit:
-                                        game['vars']['text'] = [now, f"{got}. Well you didn't get anything."]
+                                        game['vars']['text'] = [now, f"{got+1}. Well you didn't get anything."]
                                     elif temp == 36 and not temp_hit:
-                                        game['vars']['text'] = [now, f"{got}. You lost ${game['vars']['bet']}..."]
+                                        game['vars']['text'] = [now, f"{got+1}. You lost ${temp_cost}..."]
                                     elif temp_hit:
-                                        game['vars']['text'] = [now, f"{got}. You won ${temp_won}!"]
+                                        game['vars']['text'] = [now, f"{got+1}. You won ${temp_won}!"]
                                     else:
-                                        game['vars']['text'] = [now, f"{got}. You lost ${temp_cost}..."]
+                                        game['vars']['text'] = [now, f"{got+1}. You lost ${temp_cost}..."]
                                 game['vars']['ISTM'] = False
                                 save(savefile, current)
                                 game['vars']['start'] = False
@@ -1950,6 +1952,8 @@ while run:
                             casino_font.render_to(screen, (50, 365), "x10", (255, 255, 255))
                             if pg.Rect(10, 350, 120, 50).collidepoint(mouse) and clciked:
                                 game['vars']['bet'] *= 10
+                            if now - game['vars']['finished'] > 500:
+                                game['vars']['effect'] = [False, "None"]
                         else:
                             if now - game['vars']['finished'] > 250:
                                 game['vars']['slots'] = [None, None, None]
@@ -1965,16 +1969,19 @@ while run:
                                         current['CasinoChips'] += 5000*game['vars']['bet']
                                         game['vars']['text'] = [now+2500,
                                         f"YOU HIT THE JACKPOT! {5000*game['vars']['bet']}"]
+                                        game['vars']['effect'] = [True, "JACKPOT"]
                                     elif actm in [15, 16, 17, 18]:
                                         current['CasinoChips'] += 99*game['vars']['bet']
                                         game['vars']['text'] = [now+2000,
                                             f"You won ${100*game['vars']['bet']}!"]
+                                        game['vars']['effect'] = [True, "TRIPLE B"]
                                     else:
                                         mystery_mult = random.uniform(9, 19)
                                         current['CasinoChips'] += int(game['vars'][
                                         'bet']*mystery_mult)
                                         game['vars']['text'] = [now+1500,
                                         f"You won ${int((mystery_mult+1)*game['vars']['bet'])}"]
+                                        game['vars']['effect'] = [True, "Triple"]
                                     
                                 else:
                                     if game['vars']['slots'][0] == game['vars']['slots'][1]:
@@ -1987,6 +1994,7 @@ while run:
                                         current['CasinoChips'] += game['vars']['bet']*4
                                         game['vars']['text'] = [now+1200,
                                             f"You won ${game['vars']['bet']*5}!"]
+                                        game['vars']['effect'] = [True, "Double F"]
                                     elif proceed:
                                         mystery_mult = random.uniform(0, 1)
                                         current['CasinoChips'] += int(game[
@@ -1994,26 +2002,28 @@ while run:
                                         game['vars']['text'] = [now+1050,
                                             f"You won ${int(game['vars']['bet']*(mystery_mult+1))}!"]
                                         int(game['vars']['bet']*(mystery_mult+1))
+                                        game['vars']['effect'] = [True, "small"]
                                     else:
                                         myst_mult = random.uniform(0, 0.5)
                                         current['CasinoChips'] += int(game['vars'][
                                             'bet']*myst_mult)
                                         game['vars']['text'] = [now+750,
                                             f"You won ${int(myst_mult*game['vars']['bet'])}!"]
+                                        game['vars']['effect'] = [True, "bruh"]
                                 save(savefile, current)
                     else:
                         if game['vars']['slots'][0] or game['vars']['slots'][0] == 0:
                             screen.blit(casino_slots[game['vars']['slots'][0]], (180, 150))
                         else:
-                            screen.blit(casino_slots[now%20], (180, 150))
+                            screen.blit(dsvcs[now%20], (180, 150))
                         if game['vars']['slots'][1] or game['vars']['slots'][1] == 0:
                             screen.blit(casino_slots[game['vars']['slots'][1]], (330, 150))
                         else:
-                            screen.blit(casino_slots[(now+3)%20], (330, 150))
+                            screen.blit(dsvcs[(now+3)%20], (330, 150))
                         if game['vars']['slots'][2] or game['vars']['slots'][2] == 0:
                             screen.blit(casino_slots[game['vars']['slots'][2]], (480, 150))
                         else:
-                            screen.blit(casino_slots[(now+7)%20], (480, 150))
+                            screen.blit(dsvcs[(now+7)%20], (480, 150))
                         if not None in game['vars']['slots'] and now > game[
                             'vars']['last_got_roll']:
                             game['vars']['rolling'] = False
@@ -2028,9 +2038,40 @@ while run:
                                         game['vars']['last_got_roll'] = now+500
                                         break
                                     spci += 1
-
                     if now < game['vars']['text'][0]:
                         casino_font.render_to(screen, (200, 50), game['vars']['text'][1])
+                    if game['vars']['effect'][0]:
+                        if game['vars']['effect'][1] == "JACKPOT":
+                            if frame%2:
+                                screen.fill((255, 0, 0))
+                            else:
+                                screen.fill((255, 255, 0))
+                        elif game['vars']['effect'][1] == "TRIPLE B":
+                            tripleb_surface = pg.Surface((800, 600), pg.SRCALPHA)
+                            if frame%3:
+                                tripleb_surface.fill((255, 0, 0, 85))
+                            else:
+                                tripleb_surface.fill((255, 255, 0, 85))
+                            screen.blit(tripleb_surface, (0, 0))
+                        elif game['vars']['effect'][1] == "Triple":
+                            triple_surface = pg.Surface((800, 600), pg.SRCALPHA)
+                            triple_surface.fill((random.randint(0, 255),
+                                                 random.randint(0, 255),
+                                                 random.randint(0, 255),
+                                                 random.randint(0, 96)))
+                            screen.blit(triple_surface, (0, 0))
+                        elif game['vars']['effect'][1] == "Double F":
+                            doublef_surface = pg.Surface((800, 600), pg.SRCALPHA)
+                            doublef_surface.fill((255, 255, 0, (now-game['vars']['finished'])//2))
+                            screen.blit(doublef_surface, (0, 0))
+                        elif game['vars']['effect'][1] == "small":
+                            small_surface = pg.Surface((800, 600), pg.SRCALPHA)
+                            small_surface.fill((255, 255, 0, (now-game['vars']['finished'])//10))
+                            screen.blit(small_surface, (0, 0))
+                        elif game['vars']['effect'][1] == "bruh":
+                            bruh_surface = pg.Surface((800, 600), pg.SRCALPHA)
+                            bruh_surface.fill((0, 0, 0, (now-game['vars']['finished'])/3))
+                            screen.blit(bruh_surface, (0, 0))
                 elif game['ID'] == 3:
                     if game['vars']['read']:
                         screen.fill((255, 255, 255))
