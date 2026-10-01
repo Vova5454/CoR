@@ -289,6 +289,11 @@ framei = 0
 inspired = False
 ribbit = pg.mixer.Sound('res/sound/frog.mp3')
 
+def cv(v):
+    if v > 255: return 255
+    if v < 0: return 0
+    return v
+
 def save(savefile, data=None):
     if data is None:
         try:
@@ -1914,7 +1919,7 @@ while run:
                                 game['on'] = False
                             if (pg.Rect(300, 45, 200, 50).collidepoint(
                                 mouse) and clciked) or (' ' in pressing):
-                                if game['vars']['bet'] < current['CasinoChips']:
+                                if game['vars']['bet'] <= current['CasinoChips']:
                                     game['vars']['rolling'] = True
                                 else:
                                     game['vars']['text'] = [now+1000, "Insufficient Funds"]
@@ -2055,22 +2060,22 @@ while run:
                             screen.blit(tripleb_surface, (0, 0))
                         elif game['vars']['effect'][1] == "Triple":
                             triple_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            triple_surface.fill((random.randint(0, 255),
-                                                 random.randint(0, 255),
-                                                 random.randint(0, 255),
-                                                 random.randint(0, 96)))
+                            triple_surface.fill((cv(random.randint(0, 255)),
+                                                 cv(random.randint(0, 255)),
+                                                 cv(random.randint(0, 255)),
+                                                 cv(random.randint(0, 96))))
                             screen.blit(triple_surface, (0, 0))
                         elif game['vars']['effect'][1] == "Double F":
                             doublef_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            doublef_surface.fill((255, 255, 0, (now-game['vars']['finished'])//2))
+                            doublef_surface.fill((255, 255, 0, cv((now-game['vars']['finished'])//2)))
                             screen.blit(doublef_surface, (0, 0))
                         elif game['vars']['effect'][1] == "small":
                             small_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            small_surface.fill((255, 255, 0, (now-game['vars']['finished'])//10))
+                            small_surface.fill((255, 255, 0, cv((now-game['vars']['finished'])//10)))
                             screen.blit(small_surface, (0, 0))
                         elif game['vars']['effect'][1] == "bruh":
                             bruh_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            bruh_surface.fill((0, 0, 0, (now-game['vars']['finished'])/3))
+                            bruh_surface.fill((0, 0, 0, cv((now-game['vars']['finished'])/3)))
                             screen.blit(bruh_surface, (0, 0))
                 elif game['ID'] == 3:
                     if game['vars']['read']:
