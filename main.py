@@ -305,22 +305,6 @@ def save(savefile, data=None):
     with open(savefile, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-playing = {
-    'home': float('-inf'),
-    '1': float('-inf'),
-    '2': float('-inf'),
-    '3': float('-inf'),
-    '4': float('-inf'),
-    '5': float('-inf'),
-    '6': float('-inf'),
-    '7': float('-inf'),
-    'CoR1': float('-inf'),
-    'Arcade': float('-inf'),
-    'Ping-Pong': float('-inf'),
-    "Space-Invaders": float('-inf'),
-    "PingPongWV": float('-inf')
-}
-
 settings = save("saves/settings.json")
 sfx = settings['sfx']
 mus = settings['mus']
@@ -340,8 +324,11 @@ musID = {
     'Arcade': pg.mixer.Sound("res/sound/arcade.mp3"),
     'Ping-Pong': pg.mixer.Sound('res/sound/PingPong.mp3'),
     "Space-Invaders": pg.mixer.Sound('res/sound/SpaceInvaders.mp3'),
-    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3")
+    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3"),
+    "Casino": pg.mixer.Sound("res/sound/Casino.mp3")
 }
+
+playing = {music: float('-inf') for music in musID}
 
 def setup_dialogue(text, diaID=0, your_options=[],
                    font=pgft.SysFont(None, 36), name=None):
@@ -595,10 +582,12 @@ while run:
             current['mus'] = 'home'
         elif current['loc'][1:] == "'s_room":
             current['mus'] = f'{current['loc'][0]}'
-        elif current['loc'] in ["intersection1", "Arcade"]:
+        elif current['loc'] in ["intersection1", "Arcade", "DatCorner"]:
             current['mus'] = 'CoR1'
         elif current['loc'] == "Arcade1" and not game['on']:
             current['mus'] = 'Arcade'
+        elif current['loc'] == "CasinoEntrance":
+            current['mus'] = "Casino"
         for id, music in musID.items():
             if id != current['mus']:
                 playing[id] = float('-inf')
@@ -2268,7 +2257,12 @@ while run:
                             casino_font.render_to(screen, (10, 280), game['vars']['text'][1])
                     else:
                         screen.fill((0, 0, 0))
-                        casino_font.render_to(screen, (10, 10), "Rules here", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 10), "In this game you need for the sum of the value of your card to be as", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 60), "close to 21 without going over. If you go over 21 you lose, same", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 110), "applies for the dealer. If you both go over 21, you lose. Cards 2-10", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 160), "are worth their value. Jack, Queen and King are worth 10. Aces can", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 210), "be worth 1 or 11 depending on what benefits the player more", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 260), "Click to start. Click ESC to exit and type to choose bet.", (255, 255, 255))
                         if clciked:
                             game['vars']['read'] = True
             elif game['type'] == "TEMPE":
