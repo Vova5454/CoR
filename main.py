@@ -240,7 +240,6 @@ errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
 
 six_files = [None, None, None, None, None, None]
-v = 0
 def fill_out_six_files():
     for i in range(6):
         if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
@@ -519,7 +518,6 @@ while run:
         for recti in range(len(mmbuttons)):
             if mmbuttons[recti].collidepoint(mouse) and clciked and not savem and not deleto:
                 clciked = False
-                # if recti == 2 and now-lastm>200:
                 if recti == 2:
                     bye.set_volume(sfx)
                     bye.play()
@@ -1128,7 +1126,6 @@ while run:
                         pg.draw.rect(screen, (255, 255, 0), game["objects"]['player'])
                         screen.blit(images['ppu'], game['objects']['player'].topleft)
                         ball = game['objects']['ball']
-                        # pg.draw.rect(screen, (255, 10, 10), game['objects']['clanker'])
                         screen.blit(images['pph'], game['objects']['clanker'].topleft)
                         mmmfont.render_to(screen, (10, 10), str(game['vars']['pscore']), (255, 255, 255))
                         mmmfont.render_to(screen, (773, 10), str(game['vars']['cscore']), (255, 255, 255))
@@ -1172,15 +1169,12 @@ while run:
                             if balle.left < 45 and dx < 0:
                                 dx = -dx
                         collided = False
-                        # if not game['objects']['clanker'].colliderect(ball):
                         if game['objects']['clanker'].center[1] > balle.center[1]:
                             game['objects']['clanker'].y -= game['consts']['clanker_speed']
                         if game['objects']['clanker'].center[1] < balle.center[1]:
                             game['objects']['clanker'].y += game['consts']['clanker_speed']
                         protective_layer = pg.Rect(15, game['objects']['player'].top, 15, 150)
                         protective_layer2 = pg.Rect(5, protective_layer.top, 10, 150)
-                        # pg.draw.rect(screen, (127, 0, 255), protective_layer)
-                        # pg.draw.rect(screen, (127, 127, 255), protective_layer2)
                         if (ball.colliderect(game['objects']['player'])
                             or ball.colliderect(
                                 protective_layer)
@@ -1190,9 +1184,6 @@ while run:
                                 game['vars']['dx'] *= -1
                                 collided = True
                         if ball.colliderect(game['objects']['clanker']) and game['vars']['dx'] > 0:
-                            # if game['objects']['ball'].top+12 > game['objects']['clanker'].top and game[
-                            #     "objects"
-                            # ]['ball'].bottom < game['objects']['clanker'].bottom+12:
                             game['vars']['dx'] *= -1
                             collided = True
                         if game['vars']['pscore'] >= 10 or game['vars']['cscore'] >= 10:
@@ -1597,7 +1588,6 @@ while run:
                             if arfae.collidepoint(mouse) and clciked:
                                 ae = [0, 0, 0, 0, 5, 5]
                                 mso = "add_enemy"
-                                # hdfs = [False for _ in range(12)]
                                 wyt = None
                             pg.draw.rect(screen, (196, 196, 196), rfew)
                             pg.draw.rect(screen, (196, 196, 196), rfeh)
@@ -2036,6 +2026,7 @@ while run:
                     else:
                         if game['vars']['slots'][0] or game['vars']['slots'][0] == 0:
                             screen.blit(casino_slots[game['vars']['slots'][0]], (180, 150))
+                            game['vars']['effect'] = [False, "None"]
                         else:
                             screen.blit(dsvcs[now%20], (180, 150))
                         if game['vars']['slots'][1] or game['vars']['slots'][1] == 0:
