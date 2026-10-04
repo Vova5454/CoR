@@ -19,6 +19,43 @@ clock = pg.time.Clock()
 screen.blit(pg.image.load('res/loading.png'), (0, 0))
 pg.display.flip()
 
+default = {
+    "loc": "start",
+    "mus": 'home',
+    'blowhornblew': 0,
+    "atebanana": False,
+    'touched_money': False,
+    "poster": False,
+    "sat_on_couch_count": 0,
+    "6Chips": False,
+    "Ping-Pong_high_score": 0,
+    "legend": False,
+    "inventory": [],
+    "got_key": False,
+    "CasinoChips": 0
+}
+
+save_folder = os.environ.get("LOCALAPPDATA")
+if not save_folder:
+    save_folder = os.path.join(os.path.expanduser("~"), "AppData", "Local")
+save_folder = os.path.join(save_folder, "CoR")
+os.makedirs(save_folder, exist_ok=True)
+
+def save(savefile, data=None):
+    path = os.path.join(save_folder, savefile)
+    if data is None:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            save(savefile, default)
+            return default
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
+
+def file_thing(v):
+    return v
+
 movement = {
     'start': {'bathroom': pg.Rect(305, 98, 99, 206),
               'living_room': pg.Rect(652, 188, 48, 262)},
@@ -202,6 +239,15 @@ right = pg.image.load("res/dummy_right.png")
 errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
 
+six_files = [None, None, None, None, None, None]
+v = 0
+def fill_out_six_files():
+    for i in range(6):
+        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
+            six_files[i] = save(f"data{i+1}.json")
+        else:
+            six_files[i] = {}
+
 mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
 mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
 savefile = None
@@ -222,21 +268,6 @@ filerects0 = [pg.Rect(200+150*x, 50, 100, 50) for x in range(3)]
 filerects1 = [pg.Rect(200+150*x, 500, 100, 50) for x in range(3)]
 filerects = filerects0 + filerects1
 slick = False
-default = {
-    "loc": "start",
-    "mus": 'home',
-    'blowhornblew': 0,
-    "atebanana": False,
-    'touched_money': False,
-    "poster": False,
-    "sat_on_couch_count": 0,
-    "6Chips": False,
-    "Ping-Pong_high_score": 0,
-    "legend": False,
-    "inventory": [],
-    "got_key": False,
-    "CasinoChips": 0
-}
 
 mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
 mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
@@ -294,18 +325,11 @@ def cv(v):
     if v < 0: return 0
     return v
 
-def save(savefile, data=None):
-    if data is None:
-        try:
-            with open(savefile, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception:
-            save(savefile, default)
-            return default
-    with open(savefile, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4)
-
-settings = save("saves/settings.json")
+if not os.path.exists(os.path.join(save_folder, "settings.json")):
+    save("settings.json", {"sfx": 1, "mus": 1})
+    settings = {"sfx": 1, "mus": 1}
+else:
+    settings = save("settings.json")
 sfx = settings['sfx']
 mus = settings['mus']
 
@@ -482,7 +506,7 @@ while run:
         minifont = pgft.SysFont(None, 12)
         minifont.render_to(screen, (660, 60), str((settings['sfx']*100)//1), (255, 255, 255))
         minifont.render_to(screen, (660, 160), str((settings['mus']*100)//1), (255, 255, 255))
-        save("saves/settings.json", settings)
+        save("settings.json", settings)
         sfx = settings['sfx']
         mus = settings['mus']
         clciked = False
@@ -503,6 +527,8 @@ while run:
                     run = False
                 elif recti == 1:
                     savem = True
+                    filled_out_six_files = False
+                    fill_out_six_files()
                 elif recti == 0:
                     mmmfont_read = now
                     
@@ -519,10 +545,11 @@ while run:
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
-                if os.path.exists(f'saves/data{i+1}.json'):
-                    file = save(f"saves/data{i+1}.json")
+                if six_files[i]:
+                    file = six_files[i]
                     if file.get("image", False):
-                        image = pg.transform.scale(pg.image.load(file['image']), filerects[i].size)
+                        image = pg.transform.scale(
+                        pg.image.load(file_thing(file['image'])), filerects[i].size)
                         screen.blit(image, filerects[i].topleft)
                     elif file.get("color", False):
                         pg.draw.rect(screen, file['color'], filerects[i])
@@ -535,7 +562,7 @@ while run:
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     savem = False
-                    savefile = f'saves/data{rect+1}.json'
+                    savefile = f'data{rect+1}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
                     current = save(savefile)
@@ -555,7 +582,7 @@ while run:
         if deleto:
             screen.fill((110, 20, 20))
             for i in range(len(filerects)):
-                if os.path.exists(f'saves/data{i+1}.json'):
+                if os.path.exists(os.path.join(save_folder, f'data{i+1}.json')):
                     pg.draw.rect(screen, (0, 255, 0), filerects[i])
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
@@ -565,8 +592,8 @@ while run:
                 if filerects[rect].collidepoint(mouse) and clciked:
                     clciked = False
                     savem = False
-                    if os.path.exists(f'saves/data{rect+1}.json'):
-                        os.remove(f'saves/data{rect+1}.json')
+                    if os.path.exists(os.path.join(save_folder, f'data{rect+1}.json')):
+                        os.remove(os.path.join(save_folder, f'data{rect+1}.json'))
                     deleto = False
     if now - mmmfont_read < 1500 and mm and not savem:
         mmmfont.render_to(screen,
