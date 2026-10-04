@@ -545,8 +545,8 @@ while run:
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
+                file = six_files[i]
                 if six_files[i]:
-                    file = six_files[i]
                     if file.get("image", False):
                         image = pg.transform.scale(
                         pg.image.load(file_thing(file['image'])), filerects[i].size)
@@ -558,7 +558,8 @@ while run:
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
                 c1, c2 = filerects[i].center
-                mmmfont.render_to(screen, (c1-10, c2-15), str(i+1), (255, 255, 255))
+                if not file.get("Remove_Slot_Index", False):
+                    mmmfont.render_to(screen, (c1-10, c2-15), str(i+1), (255, 255, 255))
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     savem = False
