@@ -231,65 +231,52 @@ images = {
     "CasinoBlackjack": pg.image.load("res/CasinoBlackjack.png").convert_alpha()
 }
 
-font = pg.font.Font(None, 72)
+explore = pg.image.load(file_thing("res/map_explore_sign.png"))
+left = pg.image.load(file_thing("res/dummy_left.png"))
+right = pg.image.load(file_thing("res/dummy_right.png"))
+plus = pg.image.load(file_thing("res/dummy_plus.png"))
+minus = pg.image.load(file_thing("res/dummy_minus.png"))
+frames = [pg.image.load(file_thing(f'res/frames/{x}.png')) for x in range(10)]
+casino_slots = [pg.image.load(file_thing(f'res/Casino/SlotMachine/{x}.png')) for x in range(20)]
+dsvcs = [pg.image.load(file_thing(f'res/Casino/SlotMachine/V/{x}.png')) for x in range(20)]
+blackjack_deck = [pg.image.load(file_thing(f'res/Casino/Blackjack/{x}.png')) for x in range(52)]
+blackjack_deck.append(pg.image.load(file_thing('res/Casino/Blackjack/empty.png')))
+
 pg.mixer.init()
-explore = pg.image.load("res/map_explore_sign.png")
-left = pg.image.load("res/dummy_left.png")
-right = pg.image.load("res/dummy_right.png")
+
+ribbit = pg.mixer.Sound(file_thing('res/sound/frog.mp3'))
+saved = pg.mixer.Sound(file_thing('res/sound/saved.mp3'))
+bye = pg.mixer.Sound(file_thing('res/sound/bye.mp3'))
+cor1 = pg.mixer.Sound(file_thing('res/sound/cor1.wav'))
+emergency = pg.mixer.Sound(file_thing('res/sound/emergency.mp3'))
+sprite_hit = pg.mixer.Sound(file_thing('res/sound/hit.mp3'))
+
+musID = {
+    'home': cor1,
+    '1': pg.mixer.Sound(file_thing("res/sound/1s_room.mp3")),
+    '2': pg.mixer.Sound(file_thing("res/sound/2s_room.mp3")),
+    '3': pg.mixer.Sound(file_thing("res/sound/3s_room.mp3")),
+    '4': pg.mixer.Sound(file_thing("res/sound/4s_room.mp3")),
+    '5': pg.mixer.Sound(file_thing("res/sound/5s_room.mp3")),
+    '6': pg.mixer.Sound(file_thing("res/sound/6s_room.mp3")),
+    '7': pg.mixer.Sound(file_thing("res/sound/7s_room.mp3")),
+    'CoR1': pg.mixer.Sound(file_thing("res/sound/outside.mp3")),
+    'Arcade': pg.mixer.Sound(file_thing("res/sound/arcade.mp3")),
+    'Ping-Pong': pg.mixer.Sound(file_thing('res/sound/PingPong.mp3')),
+    "Space-Invaders": pg.mixer.Sound(file_thing('res/sound/SpaceInvaders.mp3')),
+    "PingPongWV": pg.mixer.Sound(file_thing("res/sound/PingPong_WV.mp3")),
+    "Casino": pg.mixer.Sound(file_thing("res/sound/Casino.mp3"))
+}
+
+playing = {music: float('-inf') for music in musID}
+
+font = pg.font.Font(None, 72)
 errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
+casino_font = pgft.SysFont("Bell MT", 24)
+medium_casino_font = pgft.SysFont("Bell MT", 18)
+tiny_casino_font = pgft.SysFont("Bell MT", 6)
 
-six_files = [None, None, None, None, None, None]
-def fill_out_six_files():
-    for i in range(6):
-        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
-            six_files[i] = save(f"data{i+1}.json")
-        else:
-            six_files[i] = {}
-
-mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
-mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
-savefile = None
-def def_dia():
-    return {'on': False,
-            'inoptions': False,
-            'text': [],
-            'your_options': [],
-            'responses': [],
-            'diaID': 0,
-            'processID': 0,
-            'JSR': False,
-            'font': None,
-            'name': None}
-dialogue = def_dia()
-mmmfont_read = -1500
-filerects0 = [pg.Rect(200+150*x, 50, 100, 50) for x in range(3)]
-filerects1 = [pg.Rect(200+150*x, 500, 100, 50) for x in range(3)]
-filerects = filerects0 + filerects1
-slick = False
-
-mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
-mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
-mm = True
-m = False
-need_error = False
-plus = pg.image.load("res/dummy_plus.png")
-minus = pg.image.load("res/dummy_minus.png")
-frames = [pg.image.load(f'res/frames/{x}.png') for x in range(10)]
-casino_slots = [pg.image.load(f'res/casino/slotmachine/{x}.png') for x in range(20)]
-dsvcs = [pg.image.load(f'res/casino/slotmachine/v/{x}.png') for x in range(20)]
-blackjack_deck = [pg.image.load(f'res/casino/blackjack/{x}.png') for x in range(52)]
-blackjack_deck.append(pg.image.load('res/casino/blackjack/empty.png'))
-def animate(frame):
-    frame += 1
-    if frame == 10:
-        frame = 0
-    return frames[frame]
-strongest = frames[9]
-saved = pg.mixer.Sound('res/sound/saved.mp3')
-bye = pg.mixer.Sound('res/sound/bye.mp3')
-
-deleto = False
 BOOK = [["Page 1", "I am about to go to job interview.",
          "I want the position called 'CEO'. Have no idea what it is but sounds cool",
          "I really hope I get the position. I mean it's not like I have anything better to do!"],
@@ -307,22 +294,25 @@ BOOK = [["Page 1", "I am about to go to job interview.",
 TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Company Name: GCH (Good Construction of Houses)",
         "Became CEO: 17 years ago"]
-cor1 = pg.mixer.Sound('res/sound/cor1.wav')
-emergency = pg.mixer.Sound('res/sound/emergency.mp3')
-sprite_hit = pg.mixer.Sound('res/sound/hit.mp3')
+
 savem = False
-casino_font = pgft.SysFont("Bell MT", 24)
-medium_casino_font = pgft.SysFont("Bell MT", 18)
-tiny_casino_font = pgft.SysFont("Bell MT", 6)
 current = None
+deleto = False
 framei = 0
 inspired = False
-ribbit = pg.mixer.Sound('res/sound/frog.mp3')
-
-def cv(v):
-    if v > 255: return 255
-    if v < 0: return 0
-    return v
+mmmfont_read = -1500
+filerects0 = [pg.Rect(200+150*x, 50, 100, 50) for x in range(3)]
+filerects1 = [pg.Rect(200+150*x, 500, 100, 50) for x in range(3)]
+filerects = filerects0 + filerects1
+slick = False
+mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
+mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
+mm = True
+m = False
+need_error = False
+mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
+mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
+savefile = None
 
 if not os.path.exists(os.path.join(save_folder, "settings.json")):
     save("settings.json", {"sfx": 1, "mus": 1})
@@ -334,24 +324,30 @@ mus = settings['mus']
 
 ## Add inventory
 
-musID = {
-    'home': cor1,
-    '1': pg.mixer.Sound("res/sound/1s_room.mp3"),
-    '2': pg.mixer.Sound("res/sound/2s_room.mp3"),
-    '3': pg.mixer.Sound("res/sound/3s_room.mp3"),
-    '4': pg.mixer.Sound("res/sound/4s_room.mp3"),
-    '5': pg.mixer.Sound("res/sound/5s_room.mp3"),
-    '6': pg.mixer.Sound("res/sound/6s_room.mp3"),
-    '7': pg.mixer.Sound("res/sound/7s_room.mp3"),
-    'CoR1': pg.mixer.Sound("res/sound/outside.mp3"),
-    'Arcade': pg.mixer.Sound("res/sound/arcade.mp3"),
-    'Ping-Pong': pg.mixer.Sound('res/sound/PingPong.mp3'),
-    "Space-Invaders": pg.mixer.Sound('res/sound/SpaceInvaders.mp3'),
-    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3"),
-    "Casino": pg.mixer.Sound("res/sound/Casino.mp3")
-}
+def cv(v):
+    if v > 255: return 255
+    if v < 0: return 0
+    return v
 
-playing = {music: float('-inf') for music in musID}
+def animate(frame):
+    frame += 1
+    if frame == 10:
+        frame = 0
+    return frames[frame]
+strongest = frames[9]
+
+def def_dia():
+    return {'on': False,
+            'inoptions': False,
+            'text': [],
+            'your_options': [],
+            'responses': [],
+            'diaID': 0,
+            'processID': 0,
+            'JSR': False,
+            'font': None,
+            'name': None}
+dialogue = def_dia()
 
 def setup_dialogue(text, diaID=0, your_options=[],
                    font=pgft.SysFont(None, 36), name=None):
@@ -366,6 +362,14 @@ def setup_dialogue(text, diaID=0, your_options=[],
     cd['diaID'] = diaID
     return cd
 
+six_files = [None, None, None, None, None, None]
+def fill_out_six_files():
+    for i in range(6):
+        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
+            six_files[i] = save(f"data{i+1}.json")
+        else:
+            six_files[i] = {}
+
 def setup_game(g_type, g_id, objects={}, groups={}, g_vars={}, consts={}):
     return {
         "on": True,
@@ -377,7 +381,7 @@ def setup_game(g_type, g_id, objects={}, groups={}, g_vars={}, consts={}):
         "type": g_type
     }
 
-holding = False
+
 def def_game():
     return {
         "on": False,
@@ -389,7 +393,9 @@ def def_game():
         "type": None
     }
 game = def_game()
+
 frame = 0
+holding = False
 run = True
 while run:
     rdud = {}
