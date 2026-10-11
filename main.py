@@ -184,8 +184,8 @@ interactions = {
                 (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
-    "CasinoSlot": [(pg.Rect(309, 32, 191, 428), "CasinoSlot")],
-    "CasinoBlackjack": [(pg.Rect(139, 138, 472, 288), "Blackjack")]
+    "CasinoSlot": [(pg.Rect(297, 0, 196, 475), "CasinoSlot")],
+    "CasinoBlackjack": [(pg.Rect(174, 84, 471, 332), "Blackjack")]
 }
 
 images = {
