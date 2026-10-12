@@ -48,7 +48,6 @@ def save(savefile, data=None):
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception:
-            save(savefile, default)
             return default
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
@@ -307,6 +306,7 @@ filerects = filerects0 + filerects1
 slick = False
 mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
 mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
+page = 0
 mm = True
 m = False
 need_error = False
@@ -362,13 +362,14 @@ def setup_dialogue(text, diaID=0, your_options=[],
     cd['diaID'] = diaID
     return cd
 
-six_files = [None, None, None, None, None, None]
+six_files = [[None, None, None, None, None, None] for _ in range(256)]
 def fill_out_six_files():
-    for i in range(6):
-        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
-            six_files[i] = save(f"data{i+1}.json")
-        else:
-            six_files[i] = {}
+    for i in range(256):
+        for j in range(6):
+            if os.path.exists(os.path.join(save_folder, f"data{j+1+6*i}.json")):
+                six_files[i][j] = save(f"data{j+1+6*i}.json")
+            else:
+                six_files[i][j] = {}
 
 def setup_game(g_type, g_id, objects={}, groups={}, g_vars={}, consts={}):
     return {
@@ -549,8 +550,8 @@ while run:
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
-                file = six_files[i]
-                if six_files[i]:
+                file = six_files[page][i]
+                if six_files[page][i]:
                     if file.get("image", False):
                         image = pg.transform.scale(
                         pg.image.load(file_thing(file['image'])), filerects[i].size)
@@ -561,13 +562,26 @@ while run:
                         pg.draw.rect(screen, (0, 255, 0), filerects[i])
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
-                c1, c2 = filerects[i].center
                 if not file.get("Remove_Slot_Index", False):
-                    mmmfont.render_to(screen, (c1-10, c2-15), str(i+1), (255, 255, 255))
+                    text, rect = mmmfont.render(str(i+1+6*page), (255, 255, 255))
+                    rect.center = filerects[i].center
+                    screen.blit(text, rect)
+            mmmfont.render_to(screen, (400, 10), str(page+1))
+            screen.blit(minus, (0, 0))
+            screen.blit(plus, (800-plus.get_width(), 0))
+            if pg.Rect(0, 0, minus.get_width(), minus.get_height()).collidepoint(
+                mouse) and (clciked or pg.mouse.get_pressed()[2]):
+                page -= 1
+            if pg.Rect(800-plus.get_width(), 0, plus.get_width(), plus.get_height()).collidepoint(
+                mouse) and (clciked or pg.mouse.get_pressed()[2]):
+                page += 1
+            if page == -1: page = 255
+            if page == 256: page = 0
+
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     savem = False
-                    savefile = f'data{rect+1}.json'
+                    savefile = f'data{rect+1+6*page}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
                     current = save(savefile)
