@@ -188,46 +188,51 @@ interactions = {
 }
 
 images = {
-    "start": pg.image.load('res/start.png').convert_alpha(),
-    "bathroom": pg.image.load('res/bathroom.png').convert_alpha(),
-    'kitchen': pg.image.load('res/kitchen.png').convert_alpha(),
-    'his_place': pg.image.load('res/white.png'),
-    'kitchen+b': pg.image.load('res/kitchen+b.png').convert_alpha(),
-    'entry': pg.image.load('res/entry.png').convert_alpha(),
-    'hall': pg.image.load('res/hall.png').convert_alpha(),
-    'living_room': pg.image.load('res/living_room.png').convert_alpha(),
-    "1's_room": pg.image.load("res/1's_room.png").convert_alpha(),
-    "2's_room": pg.image.load("res/2's_room.png").convert_alpha(),
-    "2's_room+p": pg.image.load("res/2's_room+p.png").convert_alpha(),
-    "3's_room": pg.image.load("res/3's_room.png").convert_alpha(),
-    "4's_room": pg.image.load("res/4's_room.png").convert_alpha(),
-    "5's_room": pg.image.load("res/5's_room.png").convert_alpha(),
-    "6's_room": pg.image.load("res/6's_room.png").convert_alpha(),
-    "6's_room+C": pg.image.load("res/6's_room+C.png").convert_alpha(),
-    "7's_room": pg.image.load("res/7's_room.png").convert_alpha(),
-    "intersection1": pg.image.load("res/intersection1.png").convert_alpha(),
-    "LongAlley": pg.image.load("res/LongAlley.png").convert_alpha(),
-    "BehindHouse": pg.image.load("res/BehindHouse.png").convert_alpha(),
-    "LefterTop": pg.image.load("res/LefterTop.png").convert_alpha(),
-    "Arcade": pg.image.load("res/Arcade.png").convert_alpha(),
-    "FarWall": pg.image.load("res/FarWall.png").convert_alpha(),
-    "neighborhood1": pg.image.load("res/neighborhood1.png").convert_alpha(),
-    "intersection2": pg.image.load("res/intersection2.png").convert_alpha(),
-    "LCPE": pg.image.load('res/LCPE.png').convert_alpha(),
-    "DatCorner": pg.image.load('res/DatCorner.png').convert_alpha(),
-    "DatCornerR": pg.image.load('res/DatCornerR.png').convert_alpha(),
-    "DatCornerRB": pg.image.load('res/DatCornerRB.png').convert_alpha(),
-    "Arcade1": pg.image.load('res/Arcade1.png').convert_alpha(),
-    "ppu": pg.image.load('res/ping_pong_you.png').convert_alpha(),
-    "pph": pg.image.load('res/ping_pong_him.png').convert_alpha(),
-    "Arcade2": pg.image.load('res/arcade2.png').convert_alpha(),
-    "CasinoEntrance": pg.image.load('res/CasinoEntrance.png').convert_alpha(),
-    "Roulette": pg.image.load('res/roulette.png').convert_alpha(),
-    "CasinoSlot": pg.image.load('res/CasinoSlot.png').convert_alpha(),
-    "CSM": pg.image.load('res/CasinoSlotMachine.png').convert_alpha(),
-    "Casino/SlotMachine/empty": pg.image.load("res/Casino/SlotMachine/empty.png").convert_alpha(),
-    "LCE": pg.image.load("res/LCE.png").convert_alpha(),
-    "CasinoBlackjack": pg.image.load("res/CasinoBlackjack.png").convert_alpha()
+    "start": pg.image.load(file_thing('res/start.png')).convert_alpha(),
+    "bathroom": pg.image.load(file_thing('res/bathroom.png')).convert_alpha(),
+    'kitchen': pg.image.load(file_thing('res/kitchen.png')).convert_alpha(),
+    'his_place': pg.image.load(file_thing('res/white.png')),
+    'kitchen+b': pg.image.load(file_thing('res/kitchen+b.png')).convert_alpha(),
+    'entry': pg.image.load(file_thing('res/entry.png')).convert_alpha(),
+    'hall': pg.image.load(file_thing('res/hall.png')).convert_alpha(),
+    'living_room': pg.image.load(file_thing('res/living_room.png')).convert_alpha(),
+    "1's_room": pg.image.load(file_thing("res/1's_room.png")).convert_alpha(),
+    "2's_room": pg.image.load(file_thing("res/2's_room.png")).convert_alpha(),
+    "2's_room+p": pg.image.load(file_thing("res/2's_room+p.png")).convert_alpha(),
+    "3's_room": pg.image.load(file_thing("res/3's_room.png")).convert_alpha(),
+    "4's_room": pg.image.load(file_thing("res/4's_room.png")).convert_alpha(),
+    "5's_room": pg.image.load(file_thing("res/5's_room.png")).convert_alpha(),
+    "6's_room": pg.image.load(file_thing("res/6's_room.png")).convert_alpha(),
+    "6's_room+C": pg.image.load(file_thing("res/6's_room+C.png")).convert_alpha(),
+    "7's_room": pg.image.load(file_thing("res/7's_room.png")).convert_alpha(),
+    "intersection1": pg.image.load(file_thing("res/intersection1.png")).convert_alpha(),
+    "LongAlley": pg.image.load(file_thing("res/LongAlley.png")).convert_alpha(),
+    "BehindHouse": pg.image.load(file_thing("res/BehindHouse.png")).convert_alpha(),
+    "LefterTop": pg.image.load(file_thing("res/LefterTop.png")).convert_alpha(),
+    "Arcade": pg.image.load(file_thing("res/Arcade.png")).convert_alpha(),
+    "FarWall": pg.image.load(file_thing("res/FarWall.png")).convert_alpha(),
+    "neighborhood1": pg.image.load(file_thing("res/neighborhood1.png")).convert_alpha(),
+    "intersection2": pg.image.load(file_thing("res/intersection2.png")).convert_alpha(),
+    "LCPE": pg.image.load(file_thing('res/LCPE.png')).convert_alpha(),
+    "DatCorner": pg.image.load(file_thing('res/DatCorner.png')).convert_alpha(),
+    "DatCornerR": pg.image.load(file_thing('res/DatCornerR.png')).convert_alpha(),
+    "DatCornerRB": pg.image.load(file_thing('res/DatCornerRB.png')).convert_alpha(),
+    "Arcade1": pg.image.load(file_thing('res/arcade1.png')).convert_alpha(),
+    "ppu": pg.image.load(file_thing('res/ping_pong_you.png')).convert_alpha(),
+    "pph": pg.image.load(file_thing('res/ping_pong_him.png')).convert_alpha(),
+    "Arcade2": pg.image.load(file_thing('res/Arcade2.png')).convert_alpha(),
+    "CasinoEntrance": pg.image.load(file_thing('res/CasinoEntrance.png')).convert_alpha(),
+    "Roulette": pg.image.load(file_thing('res/roulette.png')).convert_alpha(),
+    "CasinoSlot": pg.image.load(file_thing('res/CasinoSlot.png')).convert_alpha(),
+    "CSM": pg.image.load(file_thing('res/CasinoSlotMachine.png')).convert_alpha(),
+    "Casino/SlotMachine/empty": pg.image.load(file_thing("res/Casino/SlotMachine/empty.png")).convert_alpha(),
+    "LCE": pg.image.load(file_thing("res/LCE.png")).convert_alpha(),
+    "CasinoBlackjack": pg.image.load(file_thing("res/CasinoBlackjack.png")).convert_alpha()
+}
+
+icons = {
+    'key': pg.image.load(file_thing("res/icons/key.png")).convert_alpha(),
+    'null': pg.image.load(file_thing('res/icons/null.png')).convert_alpha()
 }
 
 explore = pg.image.load(file_thing("res/map_explore_sign.png"))
@@ -238,6 +243,8 @@ minus = pg.image.load(file_thing("res/dummy_minus.png"))
 frames = [pg.image.load(file_thing(f'res/frames/{x}.png')) for x in range(10)]
 casino_slots = [pg.image.load(file_thing(f'res/Casino/SlotMachine/{x}.png')) for x in range(20)]
 dsvcs = [pg.image.load(file_thing(f'res/Casino/SlotMachine/V/{x}.png')) for x in range(20)]
+inv_left = pg.image.load(file_thing("res/inv_left.png")).convert_alpha()
+inv_right = pg.image.load(file_thing("res/inv_right.png")).convert_alpha()
 blackjack_deck = [pg.image.load(file_thing(f'res/Casino/Blackjack/{x}.png')) for x in range(52)]
 blackjack_deck.append(pg.image.load(file_thing('res/Casino/Blackjack/empty.png')))
 
@@ -322,7 +329,8 @@ else:
 sfx = settings['sfx']
 mus = settings['mus']
 
-## Add inventory
+in_inventory = False
+inventory_page = 0
 
 def cv(v):
     if v > 255: return 255
@@ -985,6 +993,45 @@ while run:
                         "Do you want some Casino Chips?", None], 6, [None, None, ["Yes", "No"]],
                         name="Chip Dealer") # TEMPE
                     clciked = False
+        if not game['on'] and not dialogue['on'] and not in_inventory:
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(700, 0, 100, 50))
+            mmmfont.render_to(screen, (710, 10), "inv.", (255, 255, 255))
+            if pg.Rect(700, 0, 100, 50).collidepoint(mouse) and clciked:
+                in_inventory = True
+                continue
+        if game['on'] or dialogue['on']: in_inventory = False
+        inventory_inspection = 'null'
+        if in_inventory:
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 100, 800, 1))
+            pg.draw.rect(screen, (255, 255, 255), pg.Rect(50, 0, 600, 100))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(700, 0, 100, 100))
+            mmmfont.render_to(screen, (710, 10), "inv.", (255, 255, 255))
+            if pg.Rect(700, 0, 100, 100).collidepoint(mouse) and clciked:
+                in_inventory = False
+            if inventory_page*6>len(current['inventory']):
+                inventory_page -= 1
+            if inventory_page < 0: inventory_page = 0
+            start_pos = 50
+            if len(current['inventory'])>0:
+                for i in range(6):
+
+                    if i+6*inventory_page<len(current['inventory']):
+                        screen.blit(icons[current['inventory'][i+6*inventory_page]], (start_pos, 0))
+                        if pg.Rect(start_pos, 0, 100, 100).collidepoint(mouse) and clciked:
+                            inventory_inspection = current['inventory'][i+6*inventory_page]
+                            iiid = i+6*inventory_page
+                    else:
+                        screen.blit(icons['null'], (start_pos, 0))
+                    start_pos += 100
+            screen.blit(inv_left, (0, 0))
+            if pg.Rect(0, 0, 50, 100).collidepoint(mouse) and clciked:
+                inventory_page -= 1
+            screen.blit(inv_right, (650, 0))
+            if pg.Rect(650, 0, 50, 100).collidepoint(mouse) and clciked:
+                inventory_page += 1
+        if inventory_inspection and inventory_inspection != 'null':
+            if inventory_inspection == 'key':
+                dialogue = setup_dialogue(["It's a key!", "What could it be for?"], font=pgft.SysFont(None, 32))
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
                 screen.blit(strongest, (107, 360))
