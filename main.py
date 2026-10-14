@@ -562,7 +562,8 @@ while run:
                 if six_files[page][i]:
                     if file.get("image", False):
                         image = pg.transform.scale(
-                        pg.image.load(file_thing(file['image'])), filerects[i].size)
+                        pg.image.load(file_thing(
+                            os.path.expanduser(file['image']))), filerects[i].size)
                         screen.blit(image, filerects[i].topleft)
                     elif file.get("color", False):
                         pg.draw.rect(screen, file['color'], filerects[i])
