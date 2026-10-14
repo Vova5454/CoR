@@ -8,6 +8,11 @@ import copy
 from sprites import Player, Meteor, Buff, Laser, DummySprite
 
 
+#os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
+"This command makes each pixel 1x1 instead the default 2x2"
+"Usually, pygame makes each pixel 2 times wider and higher."
+"If you remove the # from the line above that won't happen."
+
 WIDTH = 800
 HEIGHT = 600
 FPS = 30
