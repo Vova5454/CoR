@@ -8,14 +8,14 @@ import copy
 from sprites import Player, Meteor, Buff, Laser, DummySprite
 
 
+WIDTH = 800
+HEIGHT = 600
+FPS = 30
+
 #os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
 "This command makes each pixel 1x1 instead the default 2x2"
 "Usually, pygame makes each pixel 2 times wider and higher."
 "If you remove the # from the line above that won't happen."
-
-WIDTH = 800
-HEIGHT = 600
-FPS = 30
 
 pg.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -237,7 +237,8 @@ images = {
 
 icons = {
     'key': pg.image.load(file_thing("res/icons/key.png")).convert_alpha(),
-    'null': pg.image.load(file_thing('res/icons/null.png')).convert_alpha()
+    'null': pg.image.load(file_thing('res/icons/null.png')).convert_alpha(),
+    'error': pg.image.load(file_thing('res/icons/error.png')).convert_alpha()
 }
 
 explore = pg.image.load(file_thing("res/map_explore_sign.png"))
@@ -318,7 +319,7 @@ filerects = filerects0 + filerects1
 slick = False
 mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
 mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
-page = 0
+save_file_page = 0
 mm = True
 m = False
 need_error = False
@@ -342,9 +343,9 @@ def cv(v):
     if v < 0: return 0
     return v
 
-def animate(frame):
+def animate(frames, frame):
     frame += 1
-    if frame == 10:
+    if frame == len(frames):
         frame = 0
     return frames[frame]
 strongest = frames[9]
@@ -419,7 +420,7 @@ while run:
     if framei == 30:
         framei = 0
     if framei % 3 == 0:
-        strongest = animate(framei//3)
+        strongest = animate(frames, framei//3)
     now = pg.time.get_ticks()
     need_pic = False
     screen.fill((255, 255, 255))
@@ -473,7 +474,6 @@ while run:
         for i in range(len(mbuttonstext)):
             pg.draw.rect(screen, (255, 127, 0), mbuttons[i])
             mmmfont.render_to(screen, (310, 150*i+75), mbuttonstext[i], (255, 255, 255))
-        mouse = pg.mouse.get_pos()
         for recti in range(len(mbuttons)):
             if mbuttons[recti].collidepoint(mouse) and clciked:
                 if recti == 0:
@@ -534,7 +534,6 @@ while run:
         for i in range(len(mmbuttonstext)):
           pg.draw.rect(screen, (0, 0, 0), mmbuttons[i])
           mmmfont.render_to(screen, (350, 150*i+100), mmbuttonstext[i], (255, 255, 255))
-        mouse = pg.mouse.get_pos()
         for recti in range(len(mmbuttons)):
             if mmbuttons[recti].collidepoint(mouse) and clciked and not savem and not deleto:
                 clciked = False
@@ -552,6 +551,7 @@ while run:
                     
                 elif recti == 3:
                     deleto = True
+                    fill_out_six_files()
                     screen.fill((200, 255, 255))
         if slick:
             savem = False
@@ -563,8 +563,8 @@ while run:
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
-                file = six_files[page][i]
-                if six_files[page][i]:
+                file = six_files[save_file_page][i]
+                if file:
                     if file.get("image", False):
                         image = pg.transform.scale(
                         pg.image.load(file_thing(
@@ -577,25 +577,25 @@ while run:
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
                 if not file.get("Remove_Slot_Index", False):
-                    text, rect = mmmfont.render(str(i+1+6*page), (255, 255, 255))
+                    text, rect = mmmfont.render(str(i+1+6*save_file_page), (255, 255, 255))
                     rect.center = filerects[i].center
                     screen.blit(text, rect)
-            mmmfont.render_to(screen, (400, 10), str(page+1))
+            mmmfont.render_to(screen, (400, 10), str(save_file_page+1))
             screen.blit(minus, (0, 0))
             screen.blit(plus, (800-plus.get_width(), 0))
             if pg.Rect(0, 0, minus.get_width(), minus.get_height()).collidepoint(
                 mouse) and (clciked or pg.mouse.get_pressed()[2]):
-                page -= 1
+                save_file_page -= 1
             if pg.Rect(800-plus.get_width(), 0, plus.get_width(), plus.get_height()).collidepoint(
                 mouse) and (clciked or pg.mouse.get_pressed()[2]):
-                page += 1
-            if page == -1: page = 255
-            if page == 256: page = 0
+                save_file_page += 1
+            if save_file_page == -1: save_file_page = 255
+            if save_file_page == 256: save_file_page = 0
 
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     savem = False
-                    savefile = f'data{rect+1+6*page}.json'
+                    savefile = f'data{rect+1+6*save_file_page}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
                     current = save(savefile)
@@ -615,12 +615,35 @@ while run:
         if deleto:
             screen.fill((110, 20, 20))
             for i in range(len(filerects)):
-                if os.path.exists(os.path.join(save_folder, f'data{i+1}.json')):
-                    pg.draw.rect(screen, (0, 255, 0), filerects[i])
+                file = six_files[save_file_page][i]
+                if file:
+                    if file.get('image', False):
+                        image = pg.transform.scale(
+                        pg.image.load(file_thing(
+                        os.path.expanduser(file['image']))), filerects[i].size)
+                        screen.blit(image, filerects[i].topleft)
+                    elif file.get('color', False):
+                        pg.draw.rect(screen, file['color'], filerects[i])
+                    else:
+                        pg.draw.rect(screen, (0, 255, 0), filerects[i])
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
-                c1, c2 = filerects[i].center
-                mmmfont.render_to(screen, (c1-10, c2-15), str(i+1), (255, 255, 255))
+                if not file.get('Remove_Slot_Index', False):
+                    text, rect = mmmfont.render(str(i+1+6*save_file_page), (255, 255, 255))
+                    rect.center = filerects[i].center
+                    screen.blit(text, rect)
+            mmmfont.render_to(screen, (400, 10), str(save_file_page+1))
+            screen.blit(minus, (0, 0))
+            screen.blit(plus, (800-plus.get_width(), 0))
+            if pg.Rect(0, 0, minus.get_width(), minus.get_height()).collidepoint(
+                mouse) and (clciked or pg.mouse.get_pressed()[2]):
+                save_file_page -= 1
+            if pg.Rect(800-plus.get_width(), 0, plus.get_width(), plus.get_height()).collidepoint(
+                mouse) and (clciked or pg.mouse.get_pressed()[2]):
+                save_file_page += 1
+            if save_file_page == -1: save_file_page = 255
+            if save_file_page == 256: save_file_page = 0
+
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     clciked = False
@@ -1020,11 +1043,21 @@ while run:
             start_pos = 50
             if len(current['inventory'])>0:
                 for i in range(6):
-
+                    temp_is_error = False
                     if i+6*inventory_page<len(current['inventory']):
-                        screen.blit(icons[current['inventory'][i+6*inventory_page]], (start_pos, 0))
+                        try:
+                            screen.blit(icons[current['inventory'][i+6*inventory_page]],
+                            (start_pos, 0))
+                        except KeyError:
+                            print(current['inventory'], i, inventory_page)
+                            screen.blit(icons['error'],
+                            (start_pos, 0))
+                            temp_is_error = True                    
                         if pg.Rect(start_pos, 0, 100, 100).collidepoint(mouse) and clciked:
-                            inventory_inspection = current['inventory'][i+6*inventory_page]
+                            if temp_is_error:
+                                inventory_inspection = 'error'
+                            else:
+                                inventory_inspection = current['inventory'][i+6*inventory_page]
                             iiid = i+6*inventory_page
                     else:
                         screen.blit(icons['null'], (start_pos, 0))
@@ -1037,7 +1070,10 @@ while run:
                 inventory_page += 1
         if inventory_inspection and inventory_inspection != 'null':
             if inventory_inspection == 'key':
-                dialogue = setup_dialogue(["It's a key!", "What could it be for?"], font=pgft.SysFont(None, 32))
+                dialogue = setup_dialogue(["It's a key!", "What could it be for?"],
+                                          font=pgft.SysFont(None, 32))
+            elif inventory_inspection == 'error':
+                dialogue = setup_dialogue(["An error occured :("])
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
                 screen.blit(strongest, (107, 360))
