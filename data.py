@@ -1,5 +1,4 @@
 import pygame as pg
-import pygame.freetype as pgft
 
 
 pg.init()
@@ -34,10 +33,14 @@ screen = pg.display.set_mode((800, 600))
 pg.display.set_caption("Get Cords")
 clock = pg.time.Clock()
 
-image_name = "arcade1"
+image_name = "CasinoSlot"
 IMAGE = pg.image.load(f'res/{image_name}.png').convert_alpha()
 
-rects = []
+rects = [pg.Rect(325, 340, 150, 250), pg.Rect(150, 340, 150, 250), pg.Rect(500, 340, 150, 250),
+         pg.Rect(325, 10, 150, 250), pg.Rect(150, 10, 150, 250), pg.Rect(500, 10, 150, 250)]
+rects = [pg.Rect(412, 340, 150, 250), pg.Rect(238, 340, 150, 250),
+         pg.Rect(412, 10, 150, 250), pg.Rect(238, 10, 150, 250)]
+rects = [pg.Rect(0, 0, 700, 100)]
 lp = None
 run = True
 while run:
