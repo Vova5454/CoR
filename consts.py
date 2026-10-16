@@ -1,3 +1,6 @@
+import os
+
+
 WIDTH = 800
 HEIGHT = 600
 FPS = 30
@@ -19,3 +22,9 @@ BOOK = [["Page 1", "I am about to go to job interview.",
 TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Company Name: GCH (Good Construction of Houses)",
         "Became CEO: 17 years ago"]
+
+save_folder = os.environ.get("LOCALAPPDATA")
+if not save_folder:
+    save_folder = os.path.join(os.path.expanduser("~"), "AppData", "Local")
+save_folder = os.path.join(save_folder, "CoR")
+os.makedirs(save_folder, exist_ok=True)
