@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import pygame.freetype as pgft
 from consts import save_folder
@@ -33,21 +34,27 @@ def save(savefile, data=None):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
+def file_thing(path):
+    clean_path = path.replace("\\", "/")
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, clean_path)
+
 if not os.path.exists(os.path.join(save_folder, "settings.json")):
-    save("settings.json", {"sfx": 1, "mus": 1, "samp": 1})
-    settings = {"sfx": 1, "mus": 1, "samp": 1}
+    save("settings.json", {"sfx": 0.5, "mus": 0.5, "samp": 1})
+    settings = {"sfx": 0.5, "mus": 0.5, "samp": 1}
 else:
     settings = save("settings.json")
-    if not settings.get('sfx'): settings['sfx'] = 1
-    if not settings.get('mus'): settings['mus'] = 1
-    if not settings.get('samp'): settings['samp'] = 1
+    if settings.get('sfx', []) == []: settings['sfx'] = 0.5
+    if settings.get('mus', []) == []: settings['mus'] = 0.5
+    if settings.get('samp', []) == []: settings['samp'] = 1
     save('settings.json', settings)
+
 sfx = settings['sfx']
 mus = settings['mus']
 samp = settings['samp']
-
-def file_thing(v):
-    return v
 
 def cv(v):
     if v > 255: return 255
@@ -59,7 +66,6 @@ def animate(frames, frame):
     if frame == len(frames):
         frame = 0
     return frames[frame]
-
 
 def def_dia():
     return {'on': False,

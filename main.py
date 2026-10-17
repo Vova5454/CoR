@@ -3,9 +3,9 @@ import pygame.freetype as pgft
 import os
 from time import sleep
 from interaction import process_interactions
-from consts import WIDTH, HEIGHT, FPS, SAMP_CAP, save_folder, file_thing
-from func import save, default, sfx, mus, fill_out_six_files, def_game, def_dia
-from func import setup_dialogue, setup_game, animate, settings, samp
+from consts import WIDTH, HEIGHT, FPS, SAMP_CAP, save_folder
+from func import (file_thing, save, default, sfx, mus, fill_out_six_files, def_game, def_dia,
+setup_dialogue, setup_game, animate, settings, samp)
 from game import process_game
 
 

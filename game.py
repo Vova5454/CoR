@@ -2,10 +2,10 @@ import pygame as pg
 import pygame.freetype as pgft
 from func import def_game
 import random
-from consts import minb, maxb, file_thing
+from consts import minb, maxb 
 import copy
 from sprites import Meteor, Buff, DummySprite
-from func import save, cv
+from func import file_thing, save, cv
 
 
 pgft.init()

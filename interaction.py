@@ -2,8 +2,8 @@ import pygame as pg
 import pygame.freetype as pgft
 import random
 from sprites import Laser, Player
-from consts import TEXT, BOOK, file_thing
-from func import save, setup_dialogue, setup_game
+from consts import TEXT, BOOK 
+from func import file_thing, save, setup_dialogue, setup_game
 
 
 pgft.init()

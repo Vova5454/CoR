@@ -24,9 +24,6 @@ TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Company Name: GCH (Good Construction of Houses)",
         "Became CEO: 17 years ago"]
 
-def file_thing(v):
-    return v
-
 save_folder = os.environ.get("LOCALAPPDATA")
 if not save_folder:
     save_folder = os.path.join(os.path.expanduser("~"), "AppData", "Local")

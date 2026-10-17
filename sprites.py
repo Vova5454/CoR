@@ -1,6 +1,6 @@
 import pygame as pg
 import random
-from consts import file_thing
+from func import file_thing
 
 
 class Player(pg.sprite.Sprite):
