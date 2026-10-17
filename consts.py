@@ -4,6 +4,7 @@ import os
 WIDTH = 800
 HEIGHT = 600
 FPS = 30
+SAMP_CAP = 10
 minb, maxb = 5, 5
 BOOK = [["Page 1", "I am about to go to job interview.",
          "I want the position called 'CEO'. Have no idea what it is but sounds cool",
@@ -22,6 +23,9 @@ BOOK = [["Page 1", "I am about to go to job interview.",
 TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Company Name: GCH (Good Construction of Houses)",
         "Became CEO: 17 years ago"]
+
+def file_thing(v):
+    return v
 
 save_folder = os.environ.get("LOCALAPPDATA")
 if not save_folder:

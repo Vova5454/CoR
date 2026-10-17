@@ -2,8 +2,8 @@ import pygame as pg
 import pygame.freetype as pgft
 import random
 from sprites import Laser, Player
-from consts import TEXT, BOOK
-from func import file_thing, save, setup_dialogue, setup_game
+from consts import TEXT, BOOK, file_thing
+from func import save, setup_dialogue, setup_game
 
 
 pgft.init()
@@ -13,11 +13,11 @@ emergency = pg.mixer.Sound(file_thing('res/sound/emergency.mp3'))
 ribbit = pg.mixer.Sound(file_thing('res/sound/frog.mp3'))
 
 def process_interactions(interaction, current, sfx, now, musID, playing, savefile, frame,
-    FPS, game, dialogue, inspired):
+    FPS, game, dialogue, inspired, samp):
     if interaction == 'blowhorn':
         current['blowhornblew'] = current.get('blowhornblew', 0) + 1
         emergency.set_volume(sfx)
-        emergency.play()
+        for _ in range(samp): emergency.play()
         playing['home'] = now+emergency.get_length()*1000-musID[current['mus']].get_length()*1000
         musID['home'].stop()
     elif interaction == 'talk_to_him':
@@ -47,7 +47,7 @@ def process_interactions(interaction, current, sfx, now, musID, playing, savefil
         current['loc'] = 'intersection1'
     elif interaction == 'view_hubert':
         ribbit.set_volume(sfx)
-        ribbit.play()
+        for _ in range(samp): ribbit.play()
         musID[current['mus']].stop()
         playing[current['mus']] = now-musID[current['mus']].get_length()*1000+ribbit.get_length()*1000
     elif interaction == 'steal_money':

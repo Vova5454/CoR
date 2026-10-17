@@ -34,12 +34,17 @@ def save(savefile, data=None):
         json.dump(data, f, indent=4)
 
 if not os.path.exists(os.path.join(save_folder, "settings.json")):
-    save("settings.json", {"sfx": 1, "mus": 1})
-    settings = {"sfx": 1, "mus": 1}
+    save("settings.json", {"sfx": 1, "mus": 1, "samp": 1})
+    settings = {"sfx": 1, "mus": 1, "samp": 1}
 else:
     settings = save("settings.json")
+    if not settings.get('sfx'): settings['sfx'] = 1
+    if not settings.get('mus'): settings['mus'] = 1
+    if not settings.get('samp'): settings['samp'] = 1
+    save('settings.json', settings)
 sfx = settings['sfx']
 mus = settings['mus']
+samp = settings['samp']
 
 def file_thing(v):
     return v

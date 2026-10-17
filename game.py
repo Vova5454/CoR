@@ -2,10 +2,10 @@ import pygame as pg
 import pygame.freetype as pgft
 from func import def_game
 import random
-from consts import minb, maxb
+from consts import minb, maxb, file_thing
 import copy
 from sprites import Meteor, Buff, DummySprite
-from func import file_thing, save, cv
+from func import save, cv
 
 
 pgft.init()
@@ -31,7 +31,7 @@ pg.mixer.init()
 sprite_hit = pg.mixer.Sound(file_thing('res/sound/hit.mp3'))
 
 def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse, pressing,
-    savefile, fps):
+    savefile, fps, samp):
     keys = pg.key.get_pressed()
     if game['ID'] == 0:
             game = def_game()
@@ -447,7 +447,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                 if pc:
                     pc[0].kill()
                     sprite_hit.set_volume(sfx)
-                    sprite_hit.play()
+                    for _ in range(samp): sprite_hit.play()
                 if not game['groups']['enemy']:
                     game['vars']['on'] = False
                 if keys[pg.K_w]:
@@ -964,7 +964,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                     game['vars']['finished'] = now
                     game['vars']['unfinished'] = True
                 else:
-                    if ' ' in pressing:
+                    if ' ' in pressing or clciked:
                         spci = 0
                         for slot in game['vars']['slots']:
                             if slot is None:

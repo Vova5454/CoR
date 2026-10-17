@@ -3,9 +3,9 @@ import pygame.freetype as pgft
 import os
 from time import sleep
 from interaction import process_interactions
-from consts import WIDTH, HEIGHT, FPS, save_folder
-from func import file_thing, save, default, sfx, mus, fill_out_six_files, def_game, def_dia
-from func import setup_dialogue, setup_game, animate, settings
+from consts import WIDTH, HEIGHT, FPS, SAMP_CAP, save_folder, file_thing
+from func import save, default, sfx, mus, fill_out_six_files, def_game, def_dia
+from func import setup_dialogue, setup_game, animate, settings, samp
 from game import process_game
 
 
@@ -19,7 +19,7 @@ pgft.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("CoR")
 clock = pg.time.Clock()
-screen.blit(pg.image.load('res/loading.png'), (0, 0))
+screen.blit(pg.image.load(file_thing('res/loading.png')), (0, 0))
 pg.display.flip()
 
 movement = {
@@ -205,6 +205,7 @@ icons = {
 
 plus = pg.image.load(file_thing("res/dummy_plus.png"))
 minus = pg.image.load(file_thing("res/dummy_minus.png"))
+gear = pg.image.load(file_thing('res/gear.png'))
 frames = [pg.image.load(file_thing(f'res/frames/{x}.png')) for x in range(10)]
 strongest = frames[9]
 inv_left = pg.image.load(file_thing("res/inv_left.png")).convert_alpha()
@@ -237,6 +238,8 @@ playing = {music: float('-inf') for music in musID}
 font = pg.font.Font(None, 72)
 errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
+settings_font = pgft.SysFont(None, 32)
+small_settings_font = pgft.SysFont(None, 16)
 casino_font = pgft.SysFont("Bell MT", 24)
 
 savem = False
@@ -254,6 +257,7 @@ mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
 save_file_page = 0
 mm = True
 m = False
+in_settings = False
 need_error = False
 mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
 mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
@@ -272,7 +276,6 @@ frame = 0
 holding = False
 run = True
 while run:
-    rdud = {}
     pressing = set()
     frame += 1
     framei += 1
@@ -302,7 +305,7 @@ while run:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             bye.set_volume(sfx)
-            bye.play()
+            for _ in range(samp): bye.play()
             sleep(bye.get_length())
             run = False
         if event.type == pg.KEYDOWN:
@@ -334,13 +337,13 @@ while run:
             pg.draw.rect(screen, (255, 127, 0), mbuttons[i])
             mmmfont.render_to(screen, (310, 150*i+75), mbuttonstext[i], (255, 255, 255))
         for recti in range(len(mbuttons)):
-            if mbuttons[recti].collidepoint(mouse) and clciked:
+            if mbuttons[recti].collidepoint(mouse) and clciked and not in_settings:
                 if recti == 0:
                     m = False
                 elif recti == 1:
                     save(savefile, current)
                     saved.set_volume(sfx)
-                    saved.play()
+                    for _ in range(samp): saved.play()
                 elif recti == 2:
                     current = None
                     m = False
@@ -355,39 +358,57 @@ while run:
                         playing[played] = float('-inf')
                 else:
                     bye.set_volume(sfx)
-                    bye.play()
+                    for _ in range(samp): bye.play()
                     sleep(bye.get_length())
                     run = False
-        pg.draw.rect(screen, (127, 127, 127), pg.Rect(600, 50, 150, 50))
-        pg.draw.rect(screen, (127, 127, 127), pg.Rect(600, 150, 150, 50))
-        screen.blit(plus, (600, 50))
-        screen.blit(plus, (600, 150))
-        screen.blit(minus, (700, 50))
-        screen.blit(minus, (700, 150))
-        sfxe = 0
-        muse = 0
-        if pg.Rect(600, 50, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
-            sfxe += 0.01
-        if pg.Rect(700, 50, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
-             sfxe -= 0.01
-        if pg.Rect(600, 150, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
-            muse += 0.01
-        if pg.Rect(700, 150, 50, 50).collidepoint(mouse) and (clciked or pg.mouse.get_pressed()[2]):
-            muse -= 0.01
-        settings['sfx'] += sfxe
-        settings['mus'] += muse
-        if settings['sfx'] < 0: settings['sfx'] = 0
-        if settings['mus'] < 0: settings['mus'] = 0
-        if pg.key.get_pressed()[pg.K_BACKSPACE]:
-            settings['sfx'] = 1
-            settings['mus'] = 1
-        minifont = pgft.SysFont(None, 12)
-        minifont.render_to(screen, (660, 60), str((settings['sfx']*100)//1), (255, 255, 255))
-        minifont.render_to(screen, (660, 160), str((settings['mus']*100)//1), (255, 255, 255))
-        save("settings.json", settings)
-        sfx = settings['sfx']
-        mus = settings['mus']
+        if in_settings:
+            screen.fill((127, 127, 127))
+            settings_font.render_to(screen, (20, 20),
+            f'Sound Effects: {int(settings['sfx']*100)}% volume', (255, 255, 255))
+            pg.draw.rect(screen, (255, 255, 255), pg.Rect(20, 60, 25, 40))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(21, 61, 23, 38))
+            pg.draw.rect(screen, (255, 255, 255), pg.Rect(20, 160, 25, 40))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(21, 161, 23, 38))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(45, 80, 575, 2))
+            settings_font.render_to(screen, (20, 120),
+            f'Background Music: {int(settings['mus']*100)}% volume', (255, 255, 255))
+            pg.draw.rect(screen, (255, 255, 255), pg.Rect(620, 60, 25, 40))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(621, 61, 23, 38))
+            pg.draw.rect(screen, (255, 255, 255), pg.Rect(620, 160, 25, 40))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(621, 161, 23, 38))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(45, 180, 575, 2))
+            
+            pg.draw.ellipse(screen, (255, 255, 255),
+                pg.Rect(settings['sfx']*575+33, 66, 24, 24))
+            pg.draw.ellipse(screen, (255, 255, 255),
+                pg.Rect(settings['mus']*575+33, 166, 24, 24))
+            if pg.Rect(45, 160, 575, 40).collidepoint(mouse) and holding:
+                x, _ = mouse
+                settings['mus'] = round((x-45)/575, 2)
+            if pg.Rect(45, 60, 575, 40).collidepoint(mouse) and holding:
+                x, _ = mouse
+                settings['sfx'] = round((x-45)/575, 2)
+            sfx, mus = settings['sfx'], settings['mus']
+            settings_font.render_to(screen, (25, 250), f"Sound Amplification. Cap: {SAMP_CAP}")
+            small_settings_font.render_to(screen, (25, 460),
+            "Makes every sound louder by an integer. You can change the cap in consts.py")
+            screen.blit(plus, (25, 300))
+            screen.blit(minus, (25, 400))
+            settings_font.render_to(screen, (45, 360), f"{samp}")
+            if pg.Rect(25, 300, 50, 50).collidepoint(mouse) and clciked:
+                samp += 1
+            if pg.Rect(25, 400, 50, 50).collidepoint(mouse) and clciked:
+                samp -= 1
+            if samp < 0: samp = 0
+            if samp > SAMP_CAP: samp = SAMP_CAP
+            settings['samp'] = samp
+            save('settings.json', settings)
+        screen.blit(gear, (700, 0))
+        if pg.Rect(700, 0, 100, 100).collidepoint(mouse) and clciked:
+            in_settings = {False: True, True: False}[in_settings]
         clciked = False
+    else:
+        in_settings = False
     if mm:
         screen.fill((200, 200, 200))
         for i in range(len(mmbuttonstext)):
@@ -398,7 +419,7 @@ while run:
                 clciked = False
                 if recti == 2:
                     bye.set_volume(sfx)
-                    bye.play()
+                    for _ in range(samp): bye.play()
                     sleep(bye.get_length())
                     run = False
                 elif recti == 1:
@@ -550,13 +571,13 @@ while run:
         if current:
             if now-playing[current['mus']]>=musID[current['mus']].get_length()*1000:
                 musID[current['mus']].set_volume(mus)
-                musID[current['mus']].play()
+                for _ in range(samp): musID[current['mus']].play()
                 playing[current['mus']] = now
         if current['loc'] in interactions and not dialogue['on'] and not game['on']:
             for ntc, interaction in interactions[current['loc']]:
                 if ntc.collidepoint(mouse) and clciked:
                     process_interactions(interaction, current, sfx, now, musID, playing,
-                    savefile, frame, FPS, game, dialogue, inspired)
+                    savefile, frame, FPS, game, dialogue, inspired, samp)
                     clciked = False
         if not game['on'] and not dialogue['on'] and not in_inventory:
             pg.draw.rect(screen, (0, 0, 0), pg.Rect(700, 0, 100, 50))
@@ -761,7 +782,7 @@ while run:
         now = pg.time.get_ticks()
         if game['on']:
             FPS = process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
-            pressing, savefile, FPS)
+            pressing, savefile, FPS, samp)
     holding = pg.mouse.get_pressed()[0]
     pg.display.flip()
     clock.tick(FPS)
