@@ -12,7 +12,7 @@ import random
 
 #os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
 "This command makes each pixel 1x1 instead the default 2x2"
-"Usually, pygame makes each pixel 2 times wider and higher."
+"Usually, pygame on windows makes each pixel 2 times wider and higher."
 "If you remove the # from the line above that won't happen."
 
 pg.init()
