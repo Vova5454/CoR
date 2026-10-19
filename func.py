@@ -20,7 +20,8 @@ default = {
     "legend": False,
     "inventory": [],
     "got_key": False,
-    "CasinoChips": 0
+    "CasinoChips": 0,
+    "GCH_SDP": -1,
 }
 
 def save(savefile, data=None):

@@ -331,5 +331,29 @@ def process_interactions(interaction, current, sfx, now, musID, playing, savefil
     elif interaction == "chips":
         setup_dialogue(dialogue, [
         "Since there is no way to obtain Casino Chips yet I shall give them out",
-        "Do you want some Casino Chips?", None], 6, [None, None, ["Yes", "No"]],
+        "Do you want some Casino Chips?", None], 5.5, [None, None, ["Yes", "No"]],
         name="Chip Dealer") # TEMPE
+    elif interaction == 'EnterGCH':
+        current['loc'] = 'GCH_Entrance_Top'
+    elif interaction == "SecretDoor":
+        if current['GCH_SDP'] == -1:
+            if not current['got_key']:
+                setup_dialogue(dialogue,
+                ["You feel a faint outlign of a door...", "...", "You feel a keyhole..."
+                 "It's locked."],
+                font=pgft.SysFont("Lucida Sans Regular", 16))
+                current['GCH_SDP'] += 1
+            else:
+                setup_dialogue(dialogue, ["You feel an outlign of a door...",
+                "There's a keyhole!", "Use your key?", None], 6, [None, None, None, ["YES!",
+                                    "nah"]],
+                pgft.SysFont("Lucida Sans Regular", 16))
+        elif current['GCH_SDP'] == 0:
+            if not current['got_key']:
+                setup_dialogue(dialogue, ["The door is still locked",
+                "Like what did you expect?"], font=pgft.SysFont("Lucida Sans Regular", 16))
+            else:
+                setup_dialogue(dialogue, ["You feel the keyhole...", "Use your key?", None],
+                6, [None, None, ["YES!", 'nah']], pgft.SysFont("Lucida Sans Regular", 16))
+        elif current['GCH_SDP'] == 1:
+            current['loc'] = "GCH_secret"

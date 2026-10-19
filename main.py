@@ -7,6 +7,7 @@ from consts import WIDTH, HEIGHT, FPS, SAMP_CAP, save_folder
 from func import (file_thing, save, default, sfx, mus, fill_out_six_files, def_game, def_dia,
 setup_dialogue, setup_game, animate, settings, samp)
 from game import process_game
+import random
 
 
 #os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
@@ -86,7 +87,44 @@ movement = {
     "CasinoSlot": {"CasinoEntrance": pg.Rect(0, 0, 50, 600),
                    "CasinoBlackjack": pg.Rect(750, 0, 50, 600)},
     "CasinoBlackjack": {"CasinoSlot": pg.Rect(0, 0, 50, 600)},
-    "LCE": {"LCPE": pg.Rect(0, 0, 800, 600)}
+    "LCE": {"LCPE": pg.Rect(0, 0, 800, 600)},
+    "GCH_Entrance_Top": {"DatCorner": pg.Rect(0, 550, 800, 50),
+                         "GCH_Entrance": pg.Rect(173, 1, 427, 428)},
+    "GCH_Entrance": {"GCH_Entrance_Top": pg.Rect(0, 550, 800, 50),
+                     "BarGCH": pg.Rect(261, 51, 230, 372),
+                     "GCH_Trilator": pg.Rect(0, 0, 50, 600),
+                     "GCH_BeforeBigEmptyRoom": pg.Rect(750, 0, 50, 600)},
+    "GCH_Trilator": {"GCH_Gym1": pg.Rect(346, 111, 82, 73),
+                    "GCH_Entrance": pg.Rect(0, 550, 800, 50)},
+    "GCH_secret": {"GCH_Trilator": pg.Rect(0, 550, 800, 50)},
+    "GCH_Gym1": {"GymBike": pg.Rect(507, 55, 152, 303),
+                 "GymRun": pg.Rect(112, 41, 150, 343),
+                 "GCH_Gym2": pg.Rect(265, 40, 244, 341),
+                 "GCH_Trilator": pg.Rect(750, 0, 50, 600)},
+    "GCH_Gym2": {"GymBLift": pg.Rect(528, 80, 270, 363),
+                 "GymLift": pg.Rect(2, 82, 240, 385),
+                 "GCH_Gym1": pg.Rect(0, 550, 800, 50),
+                 "GCH_Gym3": pg.Rect(245, 117, 281, 273)},
+    "GCH_Gym3": {"GymFood": pg.Rect(473, 114, 326, 337),
+                 "GymSleep": pg.Rect(1, 113, 279, 347),
+                 "GCH_Farm": pg.Rect(282, 115, 201, 342),
+                 "GCH_Gym2": pg.Rect(0, 550, 800, 50)},
+    "GCH_Farm": {"GCH_Gym3": pg.Rect(0, 550, 800, 50)},
+    "GCH_BeforeBigEmptyRoom": {"GCHLBigRoom": pg.Rect(163, 134, 72, 348),
+                               "GCHRBigRoom": pg.Rect(335, 106, 95, 317),
+                               "GCH_Entrance": pg.Rect(0, 550, 800, 50)},
+    "GCHLBigRoom": {"GCHLBehind": pg.Rect(0, 599, 800, 1),
+                    "GCH_BeforeBigEmptyRoom": pg.Rect(582, 29, 21, 482),
+                    "GCHBigRoom": pg.Rect(200, 19, 255, 284)},
+    "GCHRBigRoom": {"GCHRBehind": pg.Rect(0, 550, 800, 50),
+                    "GCH_BeforeBigEmptyRoom": pg.Rect(0, 0, 50, 600),
+                    "GCHBigRoom": pg.Rect(93, 0, 707, 348)},
+    "GCHBigRoom": {"GCHLBigRoom": pg.Rect(0, 0, 50, 600),
+                   "GCHRBigRoom": pg.Rect(0, 550, 800, 50)},
+    "GCHLBehind": {"GCHRestrictedUF": pg.Rect(128, 0, 499, 412),
+                   "GCHLBigRoom": pg.Rect(0, 550, 800, 50)},
+    "GCHRBehind": {"Baloons!": pg.Rect(372, 139, 121, 187),
+                   "GCHRBigRoom": pg.Rect(0, 550, 800, 50)}
 }
 
 interactions = {
@@ -142,7 +180,7 @@ interactions = {
     "neighborhood1": [(pg.Rect(196, 173, 67, 291), "1's_house")], ##
     'intersection2': [(pg.Rect(273, 97, 213, 243), "Dummy!")],
     "LCPE": [(pg.Rect(161, 0, 214, 139), "BrickWall")],
-    "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH"), ##
+    "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH"),
                   (pg.Rect(231, 270, 146, 131), "chips")], ##
     "DatCornerR": [(pg.Rect(449, 168, 113, 168), "EnterRestuarant")], ##
     "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")],
@@ -151,7 +189,8 @@ interactions = {
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
     "CasinoSlot": [(pg.Rect(297, 0, 196, 475), "CasinoSlot")],
-    "CasinoBlackjack": [(pg.Rect(174, 84, 471, 332), "Blackjack")]
+    "CasinoBlackjack": [(pg.Rect(174, 84, 471, 332), "Blackjack")],
+    "GCH_Trilator": [(pg.Rect(245, 94, 61, 172), "SecretDoor")]
 }
 
 images = {
@@ -194,13 +233,32 @@ images = {
     "CSM": pg.image.load(file_thing('res/CasinoSlotMachine.png')).convert_alpha(),
     "Casino/SlotMachine/empty": pg.image.load(file_thing("res/Casino/SlotMachine/empty.png")).convert_alpha(),
     "LCE": pg.image.load(file_thing("res/LCE.png")).convert_alpha(),
-    "CasinoBlackjack": pg.image.load(file_thing("res/CasinoBlackjack.png")).convert_alpha()
+    "CasinoBlackjack": pg.image.load(file_thing("res/CasinoBlackjack.png")).convert_alpha(),
+    "GCH_Entrance_Top": pg.image.load(file_thing("res/GCH_Entrance_Top.png")).convert_alpha(),
+    "GCH_Entrance": pg.image.load(file_thing("res/GCH_Entrance.png")).convert_alpha(),
+    "GCH_Trilator": pg.image.load(file_thing("res/GCHTrilator.png")).convert_alpha(),
+    "GCH_secret": pg.image.load(file_thing("res/TrashRoomWithSomeLoreGCH.png")).convert_alpha(),
+    "GCH_Gym1": pg.image.load(file_thing("res/GCHGym1.png")).convert_alpha(),
+    "GCH_Gym2": pg.image.load(file_thing("res/GCHGym2.png")).convert_alpha(),
+    "GCH_Gym3": pg.image.load(file_thing("res/GCHGym3.png")).convert_alpha(),
+    "GCH_Farm": pg.image.load(file_thing("res/GCHFarm.png")).convert_alpha(),
+    "BarGCH": pg.image.load(file_thing("res/EnterBarGCH1Thing.png")).convert_alpha(),
+    "GCH_BeforeBigEmptyRoom": pg.image.load(file_thing("res/GCH_BeforeBigEmptyRoom.png")).convert_alpha(),
+    "GCH_Table": pg.image.load(file_thing("res/GCHBarSittingAtTable.png")).convert_alpha(),
+    "GCHLBigRoom": pg.image.load(file_thing("res/GCHLBigRoom.png")).convert_alpha(),
+    "GCHRBigRoom": pg.image.load(file_thing("res/GCHRBigRoom.png")).convert_alpha(),
+    "GCHRBehind": pg.image.load(file_thing("res/GCHRBehind.png")).convert_alpha(),
+    "GCHLBehind": pg.image.load(file_thing("res/GCHLBehind.png")).convert_alpha(),
+    "GCHBigRoom": pg.image.load(file_thing("res/GCHBigRoom.png")).convert_alpha(),
+    "GCHRestrictedUF": pg.image.load(file_thing("res/GCHRestrictedUF.png")).convert_alpha()
 }
 
 icons = {
     'key': pg.image.load(file_thing("res/icons/key.png")).convert_alpha(),
     'null': pg.image.load(file_thing('res/icons/null.png')).convert_alpha(),
-    'error': pg.image.load(file_thing('res/icons/error.png')).convert_alpha()
+    'error': pg.image.load(file_thing('res/icons/error.png')).convert_alpha(),
+    'start': pg.image.load(file_thing('res/icons/Take_me_home.png')).convert_alpha(),
+    'runfalse': pg.image.load(file_thing('res/icons/runfalse.png')).convert_alpha()
 }
 
 plus = pg.image.load(file_thing("res/dummy_plus.png"))
@@ -557,7 +615,8 @@ while run:
         try:
             need_error = False
             for des, rec in movement[current['loc']].items():
-                if rec.collidepoint(mouse) and not dialogue['on'] and not game['on']:
+                if rec.collidepoint(mouse) and not dialogue['on'] and not game[
+                    'on'] and not in_inventory:
                     sur = pg.Surface((rec.width, rec.height), pg.SRCALPHA)
                     sur.fill((0, 0, 0, 127))
                     screen.blit(sur, (rec.x, rec.y))
@@ -573,7 +632,7 @@ while run:
                 musID[current['mus']].set_volume(mus)
                 for _ in range(samp): musID[current['mus']].play()
                 playing[current['mus']] = now
-        if current['loc'] in interactions and not dialogue['on'] and not game['on']:
+        if current['loc'] in interactions and not dialogue['on'] and not game['on'] and not in_inventory:
             for ntc, interaction in interactions[current['loc']]:
                 if ntc.collidepoint(mouse) and clciked:
                     process_interactions(interaction, current, sfx, now, musID, playing,
@@ -631,6 +690,11 @@ while run:
                                           font=pgft.SysFont(None, 32))
             elif inventory_inspection == 'error':
                 setup_dialogue(dialogue, ["An error occured :("])
+            elif inventory_inspection == 'start':
+                current['loc'] = random.choice([loc for loc in images])
+                print(current['loc'])
+            elif inventory_inspection == 'runfalse':
+                run = False
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
                 screen.blit(strongest, (107, 360))
@@ -709,9 +773,16 @@ while run:
                             current['inventory'].append("key")
                             current['got_key'] = True
                             dialogue['text'].append("You got the key.")
-                    elif dialogue['diaID'] == 6:
+                    elif dialogue['diaID'] == 5.5:
                         if dialogue['responses'][-1] == 0:
                             setup_game(game, "TEMPE", None, {"WTR": 1})
+                    elif dialogue['diaID'] == 6:
+                        if dialogue['responses'][-1] == 0:
+                            current['GCH_SDP'] = 1
+                            current['loc'] = 'GCH_secret'
+                            dialogue['text'].append("You unlocked the door and stepped inside")
+                        else:
+                            dialogue['text'].append("You decided not to.")
                     dialogue['JSR'] = False
                 try:
                     opt_split = dialogue['text'][dialogue['processID']]
@@ -741,7 +812,6 @@ while run:
                     
                 if temp:
                     box_lines.append(temp)
-                inde = -1
                 locat = 320
                 for text in box_lines:
                     dfont.render_to(screen, (70, locat), text, (0, 0, 0))

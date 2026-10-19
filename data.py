@@ -2,23 +2,6 @@ import pygame as pg
 
 
 pg.init()
-rec1 = pg.Rect(700, 600, 100, 600)
-rec1.bottomleft = (700, 600)
-rec2 = pg.Rect(0, 600, 100, 600)
-rec2.bottomleft = (0, 600)
-
-rec3 = pg.Rect(350, 100, 100, 100)
-rec3.bottomleft = (350, 100)
-
-loc = "0"
-
-movement = {
-    "0": {"1": rec1, "2": rec3},
-    "1": {"0": rec2},
-    "2": {"1": rec1}
-}
-
-
 
 def recty(lp, mouse, way=0):
     lc = min(lp[0], mouse[0])
@@ -33,7 +16,7 @@ screen = pg.display.set_mode((800, 600))
 pg.display.set_caption("Get Cords")
 clock = pg.time.Clock()
 
-image_name = "CasinoSlot"
+image_name = "GCHRBehind"
 IMAGE = pg.image.load(f'res/{image_name}.png').convert_alpha()
 
 rects = [pg.Rect(325, 340, 150, 250), pg.Rect(150, 340, 150, 250), pg.Rect(500, 340, 150, 250),
@@ -41,6 +24,7 @@ rects = [pg.Rect(325, 340, 150, 250), pg.Rect(150, 340, 150, 250), pg.Rect(500, 
 rects = [pg.Rect(412, 340, 150, 250), pg.Rect(238, 340, 150, 250),
          pg.Rect(412, 10, 150, 250), pg.Rect(238, 10, 150, 250)]
 rects = [pg.Rect(0, 0, 700, 100)]
+rects = []
 lp = None
 run = True
 while run:

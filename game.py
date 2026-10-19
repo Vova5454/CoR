@@ -216,13 +216,13 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         ppx = random.randint(15, 785)
                         pos = random.choice(["x", "y"])
                         if pos == "x":
-                            sarect = pg.Rect(5, ppy-20, 790, 40)
+                            game['vars']['sarect'] = pg.Rect(5, ppy-20, 790, 40)
                         else:
-                            sarect = pg.Rect(ppx-20, 5, 40, 590)
-                        pg.draw.rect(screen, (255, 0, 0), sarect)
-                    elif game['vars']['sas'] >= 450//spcttd+5 and sarect is not None:
+                            game['vars']['sarect'] = pg.Rect(ppx-20, 5, 40, 590)
+                        pg.draw.rect(screen, (255, 0, 0), game['vars']['sarect'])
+                    elif game['vars']['sas'] >= 450//spcttd+5 and game['vars']['sarect'] is not None:
                         game['vars']['sas'] = 0
-                        if player.rect.colliderect(sarect):
+                        if player.rect.colliderect(game['vars']['sarect']):
                             for _ in range(75):
                                 if player.damage():
                                     game['on'] = False
@@ -234,10 +234,10 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                             else:
                                 screen.fill((255, 255, 0))
                     elif game['vars']['sas'] < 432//spcttd:
-                        sarect = None
+                        game['vars']['sarect'] = None
                         player.boost = 1.5
-                    if sarect:
-                        pg.draw.rect(screen, (255, 0, 0), sarect)
+                    if game['vars']['sarect']:
+                        pg.draw.rect(screen, (255, 0, 0), game['vars']['sarect'])
                         player.boost = 2
                     if now - game['vars']['mst'] >= game['consts']['meteor_st']:
                         mimages = ["res/space_invaders_meteor.png", "res/space_invaders_meteor2.png", "res/space_invaders_meteor3.png"]
@@ -393,7 +393,10 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
 
             else:
                 mmmfont.render_to(screen, (15, 15), "You need to parry the ball 100 times to win.", (255, 255, 255))
-                mmmfont.render_to(screen, (15, 65), "You have 3 lives. Click to start.", (255, 255, 255))
+                mmmfont.render_to(screen, (15, 65), "You have 3 lives. Click to start. W or S to ", (255, 255, 255))
+                mmmfont.render_to(screen, (15, 115), "move. You can use keys E and D to move ", (255, 255, 255))
+                mmmfont.render_to(screen, (15, 165), "twice as slower, R and F to move 4 times ", (255, 255, 255))
+                mmmfont.render_to(screen, (15, 215), "slower and T and G to move 8 times slower.", (255, 255, 255))
                 if clciked:
                     game['vars']['on'] = True
         elif game['ID'] == 4:
@@ -405,7 +408,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         alphabet = 'abcdefghijklmnopqrstuvwxyz'
                         game['vars']['word'] += alphabet[random.randint(0, 25)]
                 pressed = []
-                for string, pgm in game['vars']['spcd'].items():
+                for string, pgm in game['consts']['spcd'].items():
                     if keys[pgm]:
                         if game['vars']['w'][string] is None:
                             game['vars']['w'][string] = frame
