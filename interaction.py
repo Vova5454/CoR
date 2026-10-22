@@ -261,7 +261,7 @@ def process_interactions(interaction, current, sfx, now, musID, playing, savefil
         setup_game(game, "Dummy!", -1,
                             {"you": pg.Rect(380, 280, 40, 40)},
                             {"enemy": pg.sprite.Group()},
-                            {"read": False, "on": False, 'mso': None},
+                            {"read": False, "on": False, 'mso': None, 'ia': None},
                             {"player_speed": 12})
     elif interaction == "BrickWall":
         setup_dialogue(dialogue, ["It's a brick wall!"])

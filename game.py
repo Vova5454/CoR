@@ -506,9 +506,9 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                     if pg.Rect(110, 10, 50, 50).collidepoint(mouse) and clciked:
                         game['consts']['player_speed'] -= 1
                     if arfae.collidepoint(mouse) and clciked:
-                        ae = [0, 0, 0, 0, 5, 5]
+                        game['vars']['ae'] = [0, 0, 0, 0, 5, 5]
                         game['vars']['mso'] = "add_enemy"
-                        wyt = None
+                        game['vars']['wyt'] = None
                     pg.draw.rect(screen, (196, 196, 196), rfew)
                     pg.draw.rect(screen, (196, 196, 196), rfeh)
                     screen.blit(plus, (450, 325))
@@ -536,6 +536,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         moved_x = 0
                         moved_y = 0
                 elif game['vars']['mso'] == "add_enemy":
+                    ae = game['vars']['ae']
                     pg.draw.rect(screen, (255, 255, 255), add)
                     pg.draw.rect(screen, (127, 127, 127), x)
                     fontf.render_to(screen, (110, 20), str(ae[0]), (255, 255, 255))
@@ -561,11 +562,11 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                     isfto = 0
                     for ia in aeb:
                         if ia.collidepoint(mouse) and clciked:
-                            wyt = isfto
+                            game['vars']['wyt'] = isfto
                             cotbfae = True
                         isfto += 1
                     if not cotbfae and clciked:
-                        ia = None
+                        game['vars']['ia'] = None
                     iadd = {
                         0: 0,
                         1: 1,
@@ -574,7 +575,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         4: 4,
                         5: 5
                     }
-                    ia = wyt
+                    ia = game['vars']['wyt']
                     if ia or ia == 0:
                         if 1 in pressing:
                                 ae[iadd[ia]] *= 10
