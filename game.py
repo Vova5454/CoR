@@ -471,6 +471,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                 rae = pg.Rect(750, 50, 40, 40)
                 sgb = pg.Rect(375, 275, 50, 50)
                 etsotp = pg.Rect(10, 10, 150, 50)
+                exr = pg.Rect(100, 400, 50, 50)
                 trfie = pg.Rect(10, 550, 40, 40)
                 add = pg.Rect(350, 250, 100, 100)
                 arfae = pg.Rect(375, 20, 50, 50)
@@ -529,12 +530,12 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         player.height -= 1
                     if trfie.collidepoint(mouse) and clciked and len(enemy):
                         game['vars']['mso'] = "inspect_enemy"
-                        enemies_but_list = [rect for rect in enemy]
-                        index_for_enemies = 0
+                        game['vars']['enemies_but_list'] = [rect for rect in enemy]
+                        game['vars']['index_for_enemies'] = 0
                     if exr.collidepoint(mouse) and clciked:
                         game['vars']['mso'] = "map_explore"
-                        moved_x = 0
-                        moved_y = 0
+                        game['vars']['moved_x'] = 0
+                        game['vars']['moved_y'] = 0
                 elif game['vars']['mso'] == "add_enemy":
                     ae = game['vars']['ae']
                     pg.draw.rect(screen, (255, 255, 255), add)
@@ -617,13 +618,13 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         game['vars']['mso'] = None
                     screen.blit(left, (325, 450))
                     screen.blit(right, (425, 450))
-                    fontf.render_to(screen, (380, 460), str(index_for_enemies), (255, 255, 255))
+                    fontf.render_to(screen, (380, 460), str(game['vars']['index_for_enemies']), (255, 255, 255))
                     if pg.Rect(325, 450, 50, 50).collidepoint(mouse) and clciked:
-                        index_for_enemies -= 1
+                        game['vars']['index_for_enemies'] -= 1
                     if pg.Rect(425, 450, 50, 50).collidepoint(mouse) and clciked:
-                        index_for_enemies += 1
-                    index_for_enemies %= len(enemies_but_list)
-                    specific_enemy = enemies_but_list[index_for_enemies]
+                        game['vars']['index_for_enemies'] += 1
+                    game['vars']['index_for_enemies'] %= len(game['vars']['enemies_but_list'])
+                    specific_enemy = game['vars']['enemies_but_list'][game['vars']['index_for_enemies']]
                     fontf.render_to(screen, (300, 100), f'X: {str(specific_enemy.rect.x)}', (255, 255, 255))
                     fontf.render_to(screen, (300, 150), f'Y: {str(specific_enemy.rect.y)}', (255, 255, 255))
                     fontf.render_to(screen, (300, 200), f'Width: {str(specific_enemy.rect.width)}', (255, 255, 255))
@@ -632,7 +633,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                     fontf.render_to(screen, (300, 350), f'DY: {str(specific_enemy.dy)}', (255, 255, 255))
                 elif game['vars']['mso'] == "map_explore":
                     game['groups']['enemy'].draw(screen)
-                    fontf.render_to(screen, (10, 10), f'{moved_x}, {moved_y}', (255, 255, 255))
+                    fontf.render_to(screen, (10, 10), f'{game['vars']['moved_x']}, {game['vars']['moved_y']}', (255, 255, 255))
                     screen.blit(explore, (100, 400))
                     if exr.collidepoint(mouse) and clciked:
                         game['vars']['mso'] = None
@@ -646,15 +647,15 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                         new_movement_y -= game['consts']['player_speed']
                     if keys[pg.K_d]:
                         new_movement_x -= game['consts']['player_speed']
-                    moved_x += new_movement_x
-                    moved_y += new_movement_y
+                    game['vars']['moved_x'] += new_movement_x
+                    game['vars']['moved_y'] += new_movement_y
                     for obj in enemy:
                         obj.rect.x += new_movement_x
                         obj.rect.y += new_movement_y
                     if game['vars']['mso'] is None:
                         for obj in enemy:
-                            obj.rect.x -= moved_x
-                            obj.rect.y -= moved_y
+                            obj.rect.x -= game['vars']['moved_x']
+                            obj.rect.y -= game['vars']['moved_y']
         else:
             fontf.render_to(screen, (10, 10), "You can simulate attack patterns with this", (255, 255, 255))
             fontf.render_to(screen, (10, 60), "dummy. You can add rects which will attack", (255, 255, 255))
