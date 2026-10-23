@@ -555,7 +555,7 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                     fontf.render_to(screen, (350, 200), "Add", (0, 255, 255))
                     fontf.render_to(screen, (10, 55), "Back", (142, 45, 66))
                     if add.collidepoint(mouse) and clciked:
-                        de = DummySprite((ae[2], ae[3]), (ae[0], ae[1]), ae[4], ae[5])
+                        de = DummySprite((abs(ae[2]), abs(ae[3])), (ae[0], ae[1]), ae[4], ae[5])
                         enemy.add(de)
                     if back.collidepoint(mouse) and clciked:
                         game['vars']['mso'] = None
