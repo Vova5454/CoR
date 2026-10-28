@@ -12,8 +12,8 @@ pg.mixer.init()
 emergency = pg.mixer.Sound(file_thing('res/sound/emergency.mp3'))
 ribbit = pg.mixer.Sound(file_thing('res/sound/frog.mp3'))
 
-def process_interactions(interaction, current, sfx, now, musID, playing, savefile, frame,
-    FPS, game, dialogue, inspired, samp):
+def process_interactions(interaction, current={}, sfx=1, now=0, musID={}, playing={},
+    savefile='data1.json', frame=0, FPS=30, game={}, dialogue={}, inspired=False, samp=1):
     if interaction == 'blowhorn':
         current['blowhornblew'] = current.get('blowhornblew', 0) + 1
         emergency.set_volume(sfx)
@@ -329,9 +329,8 @@ def process_interactions(interaction, current, sfx, now, musID, playing, savefil
                 "lmm": float('-inf'), "text": [float('-inf'), "Message"],
                 "playing": False, "end": False})
     elif interaction == "chips":
-        setup_dialogue(dialogue, [
-        "Since there is no way to obtain Casino Chips yet I shall give them out",
-        "Do you want some Casino Chips?", None], 5.5, [None, None, ["Yes", "No"]],
+        setup_dialogue(dialogue, ["I am no longer giving out chips.",
+        "They are now obtainable. This is the last update I will be in."],
         name="Chip Dealer") # TEMPE
     elif interaction == 'EnterGCH':
         current['loc'] = 'GCH_Entrance_Top'
@@ -357,3 +356,64 @@ def process_interactions(interaction, current, sfx, now, musID, playing, savefil
                 6, [None, None, ["YES!", 'nah']], pgft.SysFont("Lucida Sans Regular", 16))
         elif current['GCH_SDP'] == 1:
             current['loc'] = "GCH_secret"
+    elif interaction == 'maze': 
+        width, height = 4, 6
+        exit = random.randint(0, width*height-1)
+        raspberry = [False for _ in range(width*height)]
+        fruit = {}
+        raspberry[exit] = 'exit'
+        for room in range(width*height):
+            if room != exit:
+                rand = random.randint(1, 100)
+                if rand >= 99:
+                    raspberry[room] = 'chest'
+                    fruit[room] = random.randint(1, 6)
+                elif rand >= 95:
+                    raspberry[room] = 'lib'
+                    fruit[room] = [random.randint(1, 105), random.randint(1, 105)]
+                elif rand >= 75:
+                    raspberry[room] = 'desk'
+                    fruit[room] = [random.randint(0, 4), random.randint(1, 8)]
+                elif rand >= 55:
+                    raspberry[room] = 'junk'
+                    fruit[room] = [random.randint(1, 15),
+                                   random.randint(1, 15),
+                                   random.randint(1, 15)]
+                else:
+                    raspberry[room] = 'empty'
+        interactables = {
+            "exit": (pg.Rect(229, 154, 339, 292),),
+            "chest": (pg.Rect(224, 258, 322, 152),),
+            "lib": (pg.Rect(60, 204, 26, 82),
+                    pg.Rect(114, 203, 36, 84),
+                    pg.Rect(44, 284, 33, 73),
+                    pg.Rect(92, 285, 20, 70),
+                    pg.Rect(29, 357, 25, 90),
+                    pg.Rect(56, 363, 33, 81),
+                    pg.Rect(96, 358, 25, 92),
+                    pg.Rect(128, 353, 21, 97),
+                    pg.Rect(157, 353, 17, 98),
+                    pg.Rect(184, 356, 31, 97),
+                    pg.Rect(216, 362, 21, 81),
+                    pg.Rect(400, 128, 26, 61),
+                    pg.Rect(281, 271, 49, 94),
+                    pg.Rect(413, 270, 66, 98),
+                    pg.Rect(278, 451, 115, 89),
+                    pg.Rect(548, 125, 34, 70),
+                    pg.Rect(599, 129, 41, 65),
+                    pg.Rect(686, 193, 50, 86),
+                    pg.Rect(546, 196, 39, 82),
+                    pg.Rect(580, 362, 27, 102),
+                    pg.Rect(687, 362, 35, 101)),
+            "desk": (pg.Rect(103, 357, 109, 100),
+                     pg.Rect(101, 274, 105, 74),
+                     pg.Rect(264, 279, 273, 80),
+                     pg.Rect(583, 243, 111, 80),
+                     pg.Rect(610, 317, 94, 98)),
+            "junk": (pg.Rect(50, 50, 700, 500),)
+        }
+        setup_game(game, "maze.py", 1, {}, {},
+        {'room': random.randint(0, width*height-1),
+         'graph': {}, 'exit': exit, 'message': [float('-inf'), 'a'], 'gtg': False},
+         {'width': width, 'height': height, 'rasp': raspberry, 'fruit': fruit,
+        'interactables': interactables})

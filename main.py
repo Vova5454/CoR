@@ -3,16 +3,17 @@ import pygame.freetype as pgft
 import os
 from time import sleep
 from interaction import process_interactions
-from consts import WIDTH, HEIGHT, FPS, SAMP_CAP, save_folder
-from func import (file_thing, save, default, sfx, mus, fill_out_six_files, def_game, def_dia,
+from consts import WIDTH, HEIGHT, FPS, SAMP_CAP, maze_library_books
+from func import (file_thing, save, base, sfx, mus, fill_out_six_files, def_game, def_dia,
 setup_dialogue, setup_game, animate, settings, samp)
 from game import process_game
+from non_changeable import save_folder
 import random
 
 
 #os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
 "This command makes each pixel 1x1 instead the default 2x2"
-"Usually, pygame on windows makes each pixel 2 times wider and higher."
+"Usually, pygame on windows smakes each pixel 2 times wider and higher."
 "If you remove the # from the line above that won't happen."
 
 pg.init()
@@ -124,7 +125,8 @@ movement = {
     "GCHLBehind": {"GCHRestrictedUF": pg.Rect(128, 0, 499, 412),
                    "GCHLBigRoom": pg.Rect(0, 550, 800, 50)},
     "GCHRBehind": {"Baloons!": pg.Rect(372, 139, 121, 187),
-                   "GCHRBigRoom": pg.Rect(0, 550, 800, 50)}
+                   "GCHRBigRoom": pg.Rect(0, 550, 800, 50)},
+    'falling': {}
 }
 
 interactions = {
@@ -190,7 +192,7 @@ interactions = {
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
     "CasinoSlot": [(pg.Rect(297, 0, 196, 475), "CasinoSlot")],
     "CasinoBlackjack": [(pg.Rect(174, 84, 471, 332), "Blackjack")],
-    "GCH_Trilator": [(pg.Rect(245, 94, 61, 172), "SecretDoor")]
+    "GCH_Trilator": [(pg.Rect(245, 94, 61, 172), "SecretDoor")],
 }
 
 images = {
@@ -250,7 +252,14 @@ images = {
     "GCHRBehind": pg.image.load(file_thing("res/GCHRBehind.png")).convert_alpha(),
     "GCHLBehind": pg.image.load(file_thing("res/GCHLBehind.png")).convert_alpha(),
     "GCHBigRoom": pg.image.load(file_thing("res/GCHBigRoom.png")).convert_alpha(),
-    "GCHRestrictedUF": pg.image.load(file_thing("res/GCHRestrictedUF.png")).convert_alpha()
+    "GCHRestrictedUF": pg.image.load(file_thing("res/GCHRestrictedUF.png")).convert_alpha(),
+    "floor_desk": pg.image.load(file_thing('res/floor_desk.png')).convert_alpha(),
+    'floor_lib': pg.image.load(file_thing('res/floor_library.png')).convert_alpha(),
+    'mazeexit': pg.image.load(file_thing('res/mazeexit.png')).convert_alpha(),
+    'rare_chest': pg.image.load(file_thing('res/rare_chest.png')).convert_alpha(),
+    'void': pg.image.load(file_thing('res/void.png')).convert_alpha(),
+    'junk': pg.image.load(file_thing('res/What_is_this.png')).convert_alpha(),
+    'falling': pg.image.load(file_thing('res/falling.png')).convert_alpha()
 }
 
 icons = {
@@ -258,7 +267,23 @@ icons = {
     'null': pg.image.load(file_thing('res/icons/null.png')).convert_alpha(),
     'error': pg.image.load(file_thing('res/icons/error.png')).convert_alpha(),
     'start': pg.image.load(file_thing('res/icons/Take_me_home.png')).convert_alpha(),
-    'runfalse': pg.image.load(file_thing('res/icons/runfalse.png')).convert_alpha()
+    'runfalse': pg.image.load(file_thing('res/icons/runfalse.png')).convert_alpha(),
+    'light': pg.image.load(file_thing('res/icons/light.png')).convert_alpha(),
+    'water_bottle': pg.image.load(file_thing('res/icons/water_bottle.png')).convert_alpha(),
+    'bomb': pg.image.load(file_thing('res/icons/bomb.png')).convert_alpha(),
+    'knife': pg.image.load(file_thing('res/icons/knife.png')).convert_alpha(),
+    'maze_book1': pg.image.load(file_thing('res/icons/gamble_properly.png')).convert_alpha(),
+    'maze_book2': pg.image.load(file_thing('res/icons/kidnapped.png')).convert_alpha(),
+    'maze_book3': pg.image.load(file_thing('res/icons/waffles.png')).convert_alpha(),
+    'maze_book4': pg.image.load(file_thing('res/icons/Mr_Hubert.png')).convert_alpha(),
+    'maze_book0': pg.image.load(file_thing('res/icons/interviewer.png')).convert_alpha(),
+    'bad_dude': pg.image.load(file_thing('res/icons/bad_dude.png')).convert_alpha(),
+    'gear': pg.image.load(file_thing('res/icons/gear.png')).convert_alpha(),
+    'marshmallow': pg.image.load(file_thing('res/icons/marshmallow.png')).convert_alpha(),
+    'penny': pg.image.load(file_thing('res/icons/penny.png')).convert_alpha(),
+    'stick': pg.image.load(file_thing('res/icons/stick.png')).convert_alpha(),
+    'toy_bear': pg.image.load(file_thing('res/icons/toy_bear.png')).convert_alpha(),
+    'waffle': pg.image.load(file_thing('res/icons/waffle.png')).convert_alpha()
 }
 
 plus = pg.image.load(file_thing("res/dummy_plus.png"))
@@ -450,6 +475,14 @@ while run:
             settings_font.render_to(screen, (25, 250), f"Sound Amplification. Cap: {SAMP_CAP}")
             small_settings_font.render_to(screen, (25, 460),
             "Makes every sound louder by an integer. You can change the cap in consts.py")
+            small_settings_font.render_to(screen, (25, 490),
+            f"Change the number you see after SAMP_CAP = in line 4. From {SAMP_CAP}"+
+            " to whatever you want it to be.")
+            small_settings_font.render_to(screen, (25, 520),
+            "The reason you can't change it here is because you're not supposed to change it.")
+            cur_dir = os.path.dirname(os.path.realpath(__file__))
+            small_settings_font.render_to(screen, (25, 550),
+            f"Path to consts.py: {os.path.join(cur_dir, 'consts.py')}")
             screen.blit(plus, (25, 300))
             screen.blit(minus, (25, 400))
             settings_font.render_to(screen, (45, 360), f"{samp}")
@@ -460,6 +493,13 @@ while run:
             if samp < 0: samp = 0
             if samp > SAMP_CAP: samp = SAMP_CAP
             settings['samp'] = samp
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(500, 350, 100, 50))
+            settings_font.render_to(screen, (505, 355), "PLAY", (255, 255, 255))
+            if pg.Rect(500, 350, 100, 50).collidepoint(mouse) and clciked:
+                musID[current['mus']].stop()
+                musID[current['mus']].set_volume(mus)
+                for _ in range(samp): musID[current['mus']].play()
+                playing[current['mus']] = now
             save('settings.json', settings)
         screen.blit(gear, (700, 0))
         if pg.Rect(700, 0, 100, 100).collidepoint(mouse) and clciked:
@@ -535,16 +575,16 @@ while run:
                     savefile = f'data{rect+1+6*save_file_page}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
-                    current = save(savefile)
-                    if current == {}:
-                        save(savefile, default)
-                        current = default
-                    if os.path.exists(savefile) and os.path.getsize(savefile) == 0:
-                        save(savefile, default)
-                        current = default
-                    for elem in default:
-                        if current.get(elem, default[elem]) == default[elem]:
-                            current[elem] = default[elem]
+                    current = save(savefile, fallback=base)
+                    # if current == {}:
+                    #     save(savefile, default)
+                    #     current = default
+                    # if os.path.exists(savefile) and os.path.getsize(savefile) == 0:
+                    #     save(savefile, default)
+                    #     current = default
+                    for elem in base:
+                        if current.get(elem, base[elem]) == base[elem]:
+                            current[elem] = base[elem]
                     save(savefile, current)
                     mm = False
                     inspired = []
@@ -668,7 +708,7 @@ while run:
                             print(current['inventory'], i, inventory_page)
                             screen.blit(icons['error'],
                             (start_pos, 0))
-                            temp_is_error = True                    
+                            temp_is_error = True               
                         if pg.Rect(start_pos, 0, 100, 100).collidepoint(mouse) and clciked:
                             if temp_is_error:
                                 inventory_inspection = 'error'
@@ -689,12 +729,85 @@ while run:
                 setup_dialogue(dialogue, ["It's a key!", "What could it be for?"],
                                           font=pgft.SysFont(None, 32))
             elif inventory_inspection == 'error':
-                setup_dialogue(dialogue, ["An error occured :("])
+                setup_dialogue(dialogue, [f"An error occured. {current['inventory'][
+                    iiid]} is not an item."])
             elif inventory_inspection == 'start':
                 current['loc'] = random.choice([loc for loc in images])
                 print(current['loc'])
             elif inventory_inspection == 'runfalse':
                 run = False
+            elif inventory_inspection == 'water_bottle':
+                setup_dialogue(dialogue, ["It's a water bottle!", "You're not thirsty."],
+                               font=pgft.SysFont('Bauhaus 93', 32))
+            elif inventory_inspection == 'bomb':
+                bye.play()
+                sleep(bye.get_length())
+            elif inventory_inspection == 'knife':
+                setup_dialogue(dialogue, ["It's a pretty sharp knife.", '🔪'],
+                               font=pgft.SysFont('Chiller', 36))
+            elif inventory_inspection == 'light':
+                setup_dialogue(dialogue, ["This is very light,", "and bright.",
+                    "No wonder it's called <light>"], font=pgft.SysFont("Colonna", 40))
+            elif inventory_inspection == 'maze_book1':
+                setup_dialogue(dialogue, maze_library_books[0],
+                               font=pgft.SysFont("Book Antiqua", 24))
+            elif inventory_inspection == 'maze_book2':
+                setup_dialogue(dialogue, maze_library_books[1],
+                               font=pgft.SysFont("Juice ITC", 48))
+            elif inventory_inspection == 'maze_book3':
+                setup_dialogue(dialogue, maze_library_books[2],
+                               font=pgft.SysFont("Wide Latin", 32))
+                current['read_maze_book3'] = True
+            elif inventory_inspection == 'maze_book4':
+                setup_dialogue(dialogue, maze_library_books[3],
+                               font=pgft.SysFont("Baskerville Old Face", 24))
+            elif inventory_inspection == 'maze_book0':
+                setup_dialogue(dialogue, maze_library_books[4],
+                               font=pgft.SysFont(None, 30))
+            elif inventory_inspection == 'gear':
+                setup_dialogue(dialogue, ["It's a steel gear.",
+                "Try to find where you can use it."], font=pgft.SysFont("fixedsys", 30))
+            elif inventory_inspection == 'bad_dude':
+                temp_std = random.randint(0, len(current['inventory'])-1)
+                if temp_std == iiid:
+                    current['inventory'].pop(iiid)
+                    setup_dialogue(dialogue, ["You're lucky,",
+                    "the bad dude went away and didn't steal anything."],
+                    font=pgft.SysFont("Footlight MT Light", 24))
+                else:
+                    temp_stdn = current['inventory'][temp_std]
+                    if temp_std < iiid:
+                        current['inventory'].pop(iiid)
+                        current['inventory'].pop(temp_std)
+                    else:
+                        current['inventory'].pop(temp_std)
+                        current['inventory'].pop(iiid)
+                    setup_dialogue(dialogue, [
+                    f"The bad dude stole your {temp_stdn} and ran away!"
+                    ], font=pgft.SysFont("Footlight MT Light", 32))
+                save(savefile, current)
+            elif inventory_inspection == 'marshmallow':
+                setup_dialogue(dialogue, ["You might want to eat the marshmallow,",
+                "However,", "You found it lying in some junk, didn't you?",
+                "That's not safe to eat."], font=pgft.SysFont("Castellar", 28))
+            elif inventory_inspection == 'penny':
+                setup_dialogue(dialogue, ["It's a penny!", "Where could you use this, though?",
+                "I mean, what can you even buy with one penny?",
+                "Or even better, WHERE can you buy literally anything?"],
+                font=pgft.SysFont("Cambria Italic", 18))
+            elif inventory_inspection == 'stick':
+                setup_dialogue(dialogue, ["Stick"])
+            elif inventory_inspection == 'toy_bear':
+                setup_dialogue(dialogue, ["What a cute bear!", "You hugged the bear.",
+                "It's so fluffy!"], font=pgft.SysFont("Berlin Sans FB Demi", 32))
+            elif inventory_inspection == 'waffle':
+                if current['read_maze_book3']:
+                    setup_dialogue(dialogue, ["A waffle.", "Eating it is prohibited.",
+                    "Maybe you could deliver it to that guy who wanted a waffle?"],
+                    font=pgft.SysFont("Calibri", 25))
+                else:
+                    setup_dialogue(dialogue, ["A waffle.", "Eating it is prohibited.",],
+                    font=pgft.SysFont("Calibri", 24))                    
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
                 screen.blit(strongest, (107, 360))
@@ -773,16 +886,23 @@ while run:
                             current['inventory'].append("key")
                             current['got_key'] = True
                             dialogue['text'].append("You got the key.")
-                    elif dialogue['diaID'] == 5.5:
-                        if dialogue['responses'][-1] == 0:
-                            setup_game(game, "TEMPE", None, {"WTR": 1})
                     elif dialogue['diaID'] == 6:
                         if dialogue['responses'][-1] == 0:
                             current['GCH_SDP'] = 1
                             current['loc'] = 'GCH_secret'
-                            dialogue['text'].append("You unlocked the door and stepped inside")
+                            if not random.randint(0, 9):
+                                dialogue['text'] += ["You feel like you're falling", None]
+                                dialogue['your_options'] += ['a', ['Ok', 'Ok']]
+                                dialogue["diaID"] = 6.1
+                                current['loc'] = 'falling'
+                            else:
+                                dialogue['text'].append(
+                                    "You unlocked the door and stepped inside")
                         else:
                             dialogue['text'].append("You decided not to.")
+                    elif dialogue['diaID'] == 6.1:
+                        current['loc'] = 'GCH_secret'
+                        process_interactions('maze', game=game)
                     dialogue['JSR'] = False
                 try:
                     opt_split = dialogue['text'][dialogue['processID']]
@@ -852,7 +972,7 @@ while run:
         now = pg.time.get_ticks()
         if game['on']:
             FPS = process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
-            pressing, savefile, FPS, samp)
+            pressing, savefile, FPS, samp, dialogue)
     holding = pg.mouse.get_pressed()[0]
     pg.display.flip()
     clock.tick(FPS)

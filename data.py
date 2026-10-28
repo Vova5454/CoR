@@ -16,7 +16,7 @@ screen = pg.display.set_mode((800, 600))
 pg.display.set_caption("Get Cords")
 clock = pg.time.Clock()
 
-image_name = "GCHRBehind"
+image_name = "floor_desk"
 IMAGE = pg.image.load(f'res/{image_name}.png').convert_alpha()
 
 rects = [pg.Rect(325, 340, 150, 250), pg.Rect(150, 340, 150, 250), pg.Rect(500, 340, 150, 250),

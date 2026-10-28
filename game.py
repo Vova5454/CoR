@@ -5,7 +5,7 @@ import random
 from consts import minb, maxb 
 import copy
 from sprites import Meteor, Buff, DummySprite
-from func import file_thing, save, cv
+from func import file_thing, save, cv, determine_graph, dfs, setup_dialogue
 
 
 pgft.init()
@@ -31,7 +31,7 @@ pg.mixer.init()
 sprite_hit = pg.mixer.Sound(file_thing('res/sound/hit.mp3'))
 
 def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse, pressing,
-    savefile, fps, samp):
+    savefile, fps, samp, dialogue):
     keys = pg.key.get_pressed()
     if game['ID'] == 0:
             game = def_game()
@@ -1210,22 +1210,156 @@ def process_game(game, screen, images, clciked, now, current, frame, sfx, mouse,
                 casino_font.render_to(screen, (10, 260), "Click to start. Click ESC to exit and type to choose bet.", (255, 255, 255))
                 if clciked:
                     game['vars']['read'] = True
-    elif game['type'] == "TEMPE":
-        screen.fill((0, 0, 0))
-        casino_font.render_to(screen, (10, 10), str(game['objects']['WTR']), (255, 255, 255))
-        for key in pressing:
-            if key in ['CAPSLOCK', '-', ' ']: continue
-            if key == 'backspace':
-                game['objects']['WTR'] = 0
+    elif game['type'] == 'maze.py':
+        while not dfs(game['vars']['graph'], game['vars']['room'], game['vars']['exit']):
+            new_graph = determine_graph(game['consts']['width'], game['consts']['height'])
+            game['vars']['graph'] = new_graph
+        screen.fill((255, 255, 255))
+        room_type = game['consts']['rasp'][game['vars']['room']]
+        quick_translate = {'empty': 'void', 'desk': 'floor_desk', 'exit': 'mazeexit',
+        'lib': 'floor_lib', 'junk': 'junk', 'chest': 'rare_chest'}
+        screen.blit(images[quick_translate[room_type]], (0, 0))
+        pg.draw.rect(screen, (255, 255, 255), pg.Rect(750, 0, 50, 50))
+        mmmfont.render_to(screen, (755, 5), str(game['vars']['room']))
+        delayed_movement = False
+        for direction in game['vars']['graph'][game['vars']['room']]:
+            if direction == game['vars']['room']-game['consts']['height']:
+                directional_rect = pg.Rect(0, 0, 800, 50)
+            elif direction == game['vars']['room']-1:
+                directional_rect = pg.Rect(0, 0, 50, 600)
+            elif direction == game['vars']['room']+game['consts']['height']:
+                directional_rect = pg.Rect(0, 550, 800, 50)
+            elif direction == game['vars']['room']+1:
+                directional_rect = pg.Rect(750, 0, 50, 800)
             else:
-                game['objects']['WTR'] *= 10
-                game['objects']['WTR'] += key
-        casino_font.render_to(screen, (10, 60),
-            f"Your Casino Chips: ${current['CasinoChips']}", (255, 255, 255))
-        pg.draw.rect(screen, (255, 255, 255), pg.Rect(10, 110, 150, 50))
-        casino_font.render_to(screen, (20, 120), "Recieve")
-        if pg.Rect(10, 110, 150, 50).collidepoint(mouse) and clciked:
-            current['CasinoChips'] += game['objects']['WTR']
-        if keys[pg.K_ESCAPE]: game['on'] = False
-        casino_font.render_to(screen, (10, 250), "ESC to exit", (255, 255, 255))
+                print("Something is very wrong.", game['vars']['room'], direction)
+            if directional_rect.collidepoint(mouse):
+                move_rect = pg.Surface(directional_rect.size, pg.SRCALPHA)
+                move_rect.fill((0, 0, 0, 127))
+                screen.blit(move_rect, directional_rect.topleft)
+                if clciked:
+                    delayed_movement = True
+                    delayed_direction = direction
+                    break
+        if now < game['vars']['message'][0]:
+            mmmfont.render_to(screen, (5, 5), game['vars']['message'][1], bgcolor=(255, 255, 255))
+        tempura = game['consts']['interactables'].get(room_type, ())
+        for i in range(len(tempura)):
+            if not (tempura[i].collidepoint(mouse) and clciked):
+                continue
+            if room_type == 'exit':
+                game['on'] = False
+                game['vars']['message'] = [now+1000, 'You found the exit!']
+            elif room_type == 'chest':
+                if not random.randint(0, 999):
+                    current['inventory'].append('start')
+                    game['vars']['message'] = [now+1500, "You got something..."]
+                    continue
+                try:
+                    loot_id = game['consts']['fruit'][game['vars']['room']]
+                    del game['consts']['fruit'][game['vars']['room']]
+                except Exception:
+                    game['vars']['message'] = [now+1500, "You already looted this chest."]
+                    continue
+                if loot_id == 1:
+                    current['inventory'].append('light')
+                    game['vars']['message'] = [now+1500, "You recieved <light>!"]
+                elif loot_id == 2:
+                    current['inventory'].append('runfalse')
+                    game['vars']['message'] = [now+1500, "You recieved <runfalse>!"]
+                elif loot_id == 3:
+                    current['inventory'].append('water_bottle')
+                    game['vars']['message'] = [now+1500, "You recieved a water bottle!"]
+                elif loot_id == 4:
+                    current['inventory'].append('bomb')
+                    game['vars']['message'] = [now+1500, "You recieved a bomb!"]
+                elif loot_id == 5:
+                    amount = random.randint(50, 1000)
+                    current['CasinoChips'] += amount
+                    game['vars']['message'] = [now+1500, f"You recieved {amount} Casino Chips!"]
+                elif loot_id == 6:
+                    current['inventory'].append('knife')
+                    game['vars']['message'] = [now+1500, "You got a knife."]
+            elif room_type == 'lib':
+                id1 = game['consts']['fruit'][game['vars']['room']][0]
+                id2 = game['consts']['fruit'][game['vars']['room']][1]
+                placement1 = (id1-1)//5
+                text_id1 = id1%5
+                placement2 = (id2-1)//5
+                text_id2 = id2%5
+                if i != placement1 and i != placement2:
+                    game['vars']['message'] = [now+750, "This book has been taken."]
+                    continue
+                if placement1 == placement2:
+                    placement2 = -1
+                to_title = ["Gamble Properly", "kidnapped", "Waffles", "Mr. Hubert", "boss?"]
+                if i == placement1:
+                    game['consts']['fruit'][game['vars']['room']][0] = -1
+                    current['inventory'].append(f'maze_book{text_id1}')
+                    game['vars']['message'] = [now+2000,
+                        f"You got a book called '{to_title[text_id1]}'"]
+                elif i == placement2:
+                    game['consts']['fruit'][game['vars']['room']][1] = -1
+                    current['inventory'].append(f'maze_book{text_id2}')
+                    game['vars']['message'] = [now+2000,
+                        f"You got a book called '{to_title[text_id2]}"]
+            elif room_type == 'desk':
+                fruit = game['consts']['fruit'][game['vars']['room']]
+                if i != fruit[0]:
+                    game['vars']['message'] = [now+750, "Nothing here."]
+                    continue
+                if fruit[1] in [1, 2, 3]:
+                    current['inventory'].append('gear')
+                    game['vars']['message'] = [now+1250, "You got a steel gear."]
+                    fruit[0] = -1
+                elif fruit[1] in [4, 5]:
+                    current['inventory'].append('stick')
+                    game['vars']['message'] = [now+1250, "You got a stick."]
+                    fruit[0] = -1
+                elif fruit[1] == 6:
+                    current['inventory'].append('waffle')
+                    game['vars']['message'] = [now+1250, "You got a waffle. "+
+                                "Eating it is prohibited"]
+                    fruit[0] = -1
+                elif fruit[1] == 7:
+                    current['inventory'].append('runfalse')
+                    game['vars']['message'] = [now+1250, 'You got a <runfalse>']
+                    fruit[0] = -1
+                elif fruit[1] == 8:
+                    current['CasinoChips'] += 1
+                    game['vars']['message'] = [now+1250, 'There is an INFINITE amount of '+
+                                               'Casino Chips']
+            elif room_type == 'junk':
+                fruit = game['consts']['fruit'][game['vars']['room']]
+                if not fruit:
+                    game['vars']['message'] = [now+1250, 'Nothing left here.']
+                    continue
+                result = None
+                uncommon1 = fruit[0]>5
+                epic1 = fruit[0]>12
+                rare2 = fruit[1]>8
+                epic2 = fruit[1]>12
+                epic3 = fruit[2]>10
+                legend3 = fruit[2]>12
+                if epic1 and epic2 and legend3:
+                    result = 'toy_bear'
+                elif epic3 and rare2 and uncommon1:
+                    result = 'marshmallow'
+                elif uncommon1 and rare2:
+                    result = 'penny'
+                elif uncommon1:
+                    result = 'bad_dude'
+                if result is None:
+                    game['vars']['message'] = [now+500, 'nothing here']
+                else:
+                    current['inventory'].append(result)
+                    game['vars']['message'] = [now+1000, f'You got a {result}']
+                game['consts']['fruit'][game['vars']['room']] = False
+        if delayed_movement:
+            game['vars']['room'] = delayed_direction
+        if now < game['vars']['message'][0] and not game['on']:
+            game['on'] = True
+            game['vars']['gtg'] = True
+        if now > game['vars']['message'][0] and game['vars']['gtg']:
+            game['on'] = False
     return fps
