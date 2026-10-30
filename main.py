@@ -9,6 +9,7 @@ setup_dialogue, setup_game, animate, settings, samp)
 from game import process_game
 from non_changeable import save_folder
 import random
+import copy
 
 
 #os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
@@ -182,8 +183,7 @@ interactions = {
     "neighborhood1": [(pg.Rect(196, 173, 67, 291), "1's_house")], ##
     'intersection2': [(pg.Rect(273, 97, 213, 243), "Dummy!")],
     "LCPE": [(pg.Rect(161, 0, 214, 139), "BrickWall")],
-    "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH"),
-                  (pg.Rect(231, 270, 146, 131), "chips")], ##
+    "DatCorner": [(pg.Rect(544, 136, 133, 189), "EnterGCH")],
     "DatCornerR": [(pg.Rect(449, 168, 113, 168), "EnterRestuarant")], ##
     "DatCornerRB": [(pg.Rect(4, 90, 371, 259), "Dumpster")],
     "Arcade1": [(pg.Rect(96, 153, 115, 286), "ArcadeGame1"),
@@ -193,6 +193,7 @@ interactions = {
     "CasinoSlot": [(pg.Rect(297, 0, 196, 475), "CasinoSlot")],
     "CasinoBlackjack": [(pg.Rect(174, 84, 471, 332), "Blackjack")],
     "GCH_Trilator": [(pg.Rect(245, 94, 61, 172), "SecretDoor")],
+    "GCH_secret": [(pg.Rect(471, 50, 85, 75), "maze")]
 }
 
 images = {
@@ -575,13 +576,7 @@ while run:
                     savefile = f'data{rect+1+6*save_file_page}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
-                    current = save(savefile, fallback=base)
-                    # if current == {}:
-                    #     save(savefile, default)
-                    #     current = default
-                    # if os.path.exists(savefile) and os.path.getsize(savefile) == 0:
-                    #     save(savefile, default)
-                    #     current = default
+                    current = copy.deepcopy(save(savefile, fallback=base))
                     for elem in base:
                         if current.get(elem, base[elem]) == base[elem]:
                             current[elem] = base[elem]
